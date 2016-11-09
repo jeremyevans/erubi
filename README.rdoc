@@ -1,0 +1,59 @@
+= Erubi
+
+Erubi is a ERB template engine for ruby. It is a simplified fork of Erubis, with
+the following differences:
+
+* Handles postfix conditionals when using escaping (e.g. <tt><%= foo if bar %><tt>)
+* Supports frozen_string_literal: true in templates via :freeze option
+* Works with ruby's --enable-frozen-string-literal option
+* Escapes ' (apostrophe) when escaping for better XSS protection 
+* Has 90% smaller memory footprint
+* Does no monkey patching (Erubis adds a method to Kernel)
+* Uses an immutable design (all options passed to the constructor, which returns a frozen object)
+* Has simpler internals (1 file, <100 lines of code)
+* Has an open development model (Erubis doesn't have a public source control repository or bug tracker)
+* Is not dead (Erubis hasn't been updated since 2011)
+
+It is not designed with Erubis API compatibility in mind, though most Erubis
+ERB syntax works, with the following exceptions:
+
+* No support for <tt><%===</tt> for debug output
+* No support for custom patterns
+
+= Installation
+
+  gem install erubi
+
+= Source Code
+
+Source code is available on GitHub at https://github.com/jeremyevans/erubi
+
+= Usage
+
+The expected usage is via tilt, and erubi ships with tilt integration:
+
+  require 'tilt/erubi'
+  Tilt.new("filename.erb").render
+
+Requiring +tilt/erubi+ sets erubi as the default erb/rhtml template processor
+for tilt.  In most cases, you can use Erubi as a replacement for Erubis if
+you are using tilt.
+
+You can use the library manually, but it's only useful to get the generated
+source:
+
+  require 'erubi'
+  eval(Erubi::Engine.new(File.read('filename.erb')).src)
+
+= Reporting Bugs
+
+The bug tracker is located at https://github.com/jeremyevans/erubi/issues
+
+= License
+
+MIT
+
+= Authors
+
+Jeremy Evans <code@jeremyevans.net>
+kuwata-lab.com
