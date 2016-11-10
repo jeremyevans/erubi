@@ -3,7 +3,7 @@
 Erubi is a ERB template engine for ruby. It is a simplified fork of Erubis, with
 the following differences:
 
-* Handles postfix conditionals when using escaping (e.g. <tt><%= foo if bar %><tt>)
+* Handles postfix conditionals when using escaping (e.g. <tt><%= foo if bar %></tt>)
 * Supports frozen_string_literal: true in templates via :freeze option
 * Works with ruby's --enable-frozen-string-literal option
 * Escapes ' (apostrophe) when escaping for better XSS protection 
