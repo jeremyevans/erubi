@@ -1,3 +1,15 @@
+=== HEAD
+
+* Add erubi/capture file containing Erubi::CaptureEngine, allowing <%|= and <%|== for capture (and escaping) blocks in templates (jeremyevans)
+
+* Raise ArgumentError if template source code contains indicators matched by regexp but not handled (jeremyevans)
+
+* Add :bufval option to support arbitrary buffer values (jeremyevans)
+
+* Add :regexp option to specify regexp used for scanning (jeremyevans)
+
+* Add :src option to specify initial template source (jeremyevans)
+
 === 1.0.0 (2016-11-10)
 
 * Initial Public Release

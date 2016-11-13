@@ -22,6 +22,7 @@ if ENV['COVERAGE']
 end
 
 require 'erubi'
+require 'erubi/capture'
 require 'minitest/spec'
 require 'minitest/autorun'
 
@@ -31,9 +32,9 @@ describe Erubi::Engine do
   end
 
   def check_output(input, src, result, &block)
-    t = Erubi::Engine.new(input, @options)
-    t.src.must_equal src
+    t = (@options[:engine] || Erubi::Engine).new(input, @options)
     eval(t.src, block.binding).must_equal result
+    t.src.must_equal src
   end
 
   it "should handle no options" do
@@ -77,6 +78,96 @@ END2
 </table>
 1
 END3
+  end
+
+  [['', false], ['=', true]].each do |ind, escape|
+    it "should allow <%|=#{ind} for capturing without escaping when :escape_capture => #{escape}" do
+      @options[:bufvar] = '@a'
+      @options[:capture] = true
+      @options[:escape_capture] = escape
+      @options[:escape] = !escape
+      @options[:engine] = ::Erubi::CaptureEngine
+      @b = b = 1
+      foo = Object.new
+      foo.instance_variable_set(:@t, self)
+      def self.a; @a; end
+      def foo.bar; @t.a << "a"; yield; @t.a << 'b'; @t.a.buffer.upcase! end
+      check_output(<<END1, <<END2, <<END3){}
+<table>
+ <tbody>
+  <%|=#{ind} foo.bar do %>
+  <tr>
+   <td><%=#{ind} 1 %></td>
+   <td><%=#{ind} '&' %></td>
+  </tr>
+ <% end %>
+ </tbody>
+</table>
+END1
+#{'__erubi = ::Erubi;' unless escape}@a = ::Erubi::Buffer.new; @a << '<table>
+ <tbody>
+'; @a << '  '; @a.before_append!; @a.append=  foo.bar do  @a << '
+'; @a << '  <tr>
+   <td>'; @a << #{!escape ? '__erubi' : '::Erubi'}.h(( 1 )); @a << '</td>
+   <td>'; @a << #{!escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</td>
+  </tr>
+';  end 
+ @a << ' </tbody>
+</table>
+';
+@a.to_s
+END2
+<table>
+ <tbody>
+  A
+  <TR>
+   <TD>1</TD>
+   <TD>&AMP;</TD>
+  </TR>
+B </tbody>
+</table>
+END3
+    end
+  end
+
+  [['', true], ['=', false]].each do |ind, escape|
+    it "should allow <%|=#{ind} for capturing with escaping when :escape => #{escape}" do
+      @options[:bufvar] = '@a'
+      @options[:capture] = true
+      @options[:escape] = escape
+      @options[:engine] = ::Erubi::CaptureEngine
+      @b = b = 1
+      foo = Object.new
+      foo.instance_variable_set(:@t, self)
+      def self.a; @a; end
+      def foo.bar; @t.a << "a"; yield; @t.a << 'b'; @t.a.buffer.upcase! end
+      check_output(<<END1, <<END2, <<END3){}
+<table>
+ <tbody>
+  <%|=#{ind} foo.bar do %>
+   <b><%=#{ind} '&' %></b>
+ <% end %>
+ </tbody>
+</table>
+END1
+#{'__erubi = ::Erubi;' if escape}@a = ::Erubi::Buffer.new; @a << '<table>
+ <tbody>
+'; @a << '  '; @a.before_append!; @a.escape=  foo.bar do  @a << '
+'; @a << '   <b>'; @a << #{escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</b>
+';  end 
+ @a << ' </tbody>
+</table>
+';
+@a.to_s
+END2
+<table>
+ <tbody>
+  A
+   &lt;B&gt;&amp;AMP;&lt;/B&gt;
+B </tbody>
+</table>
+END3
+    end
   end
 
   [:outvar, :bufvar].each do |var|
@@ -337,6 +428,11 @@ END3
 
   it "should return frozen object" do
     Erubi::Engine.new('').frozen?.must_equal true
+  end
+
+  it "should raise an error if a tag is not handled when a custom regexp is used" do
+    proc{Erubi::Engine.new('<%] %>', :regexp =>/<%(={1,2}|\]|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m)}.must_raise ArgumentError
+    proc{Erubi::CaptureEngine.new('<%] %>', :regexp =>/<%(={1,2}|\]|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m)}.must_raise ArgumentError
   end
 
   it "should have working tilt support" do

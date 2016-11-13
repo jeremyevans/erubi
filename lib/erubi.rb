@@ -31,6 +31,7 @@ module Erubi
     attr_reader :bufvar
 
     # Initialize a new Erubi::Engine.  Options:
+    # :bufval :: The value to use for the buffer variable, as a string.
     # :bufvar :: The variable name to use for the buffer variable, as a string.
     # :escapefunc :: The function to use for escaping, as a string (default: ::Erubi.h).
     # :escape :: Whether to make <%= escape by default, and <%== not escape by default.
@@ -38,18 +39,22 @@ module Erubi
     # :filename :: The filename for the template.
     # :freeze :: Whether to enable frozen string literals in the resulting source code.
     # :outvar :: Same as bufvar, with lower priority.
-    # :postable :: the postamble for the template, by default returns the resulting source code.
+    # :postamble :: The postamble for the template, by default returns the resulting source code.
     # :preamble :: The preamble for the template, by default initializes up the buffer variable.
+    # :regexp :: The regexp to use for scanning.
+    # :src :: The initial value to use for the source code
     # :trim :: Whether to trim leading and trailing whitespace, true by default.
     def initialize(input, properties={})
       escape     = properties.fetch(:escape){properties.fetch(:escape_html, false)}
       trim       = properties[:trim] != false
       @filename  = properties[:filename]
       @bufvar = bufvar = properties[:bufvar] || properties[:outvar] || "_buf"
-      preamble   = properties[:preamble] || "#{bufvar} = String.new;"
+      bufval = properties[:bufval] || 'String.new'
+      regexp = properties[:regexp] || /<%(={1,2}|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m
+      preamble   = properties[:preamble] || "#{bufvar} = #{bufval};"
       postamble  = properties[:postamble] || "#{bufvar}.to_s\n"
 
-      @src = src = String.new
+      @src = src = properties[:src] || String.new
       src << "# frozen_string_literal: true\n" if properties[:freeze]
 
       unless escapefunc = properties[:escapefunc]
@@ -65,12 +70,13 @@ module Erubi
 
       pos = 0
       is_bol = true
-      input.scan(/<%(={1,2}|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m) do |indicator, code, tailch, rspace|
+      input.scan(regexp) do |indicator, code, tailch, rspace|
         match = Regexp.last_match
         len  = match.begin(0) - pos
         text = input[pos, len]
         pos  = match.end(0)
         ch   = indicator ? indicator[RANGE_FIRST] : nil
+
         lspace = nil
 
         unless ch == '='
@@ -98,7 +104,8 @@ module Erubi
 
         is_bol = rspace ? true : false
         add_text(text) if text && !text.empty?
-        if ch == '='
+        case ch
+        when '='
           rspace = nil if tailch && !tailch.empty?
           add_text(lspace) if lspace
           if ((indicator == '=') ^ escape)
@@ -107,7 +114,7 @@ module Erubi
             src << " #{bufvar} << #{escapefunc}((" << code << '));'
           end
           add_text(rspace) if rspace
-        elsif ch == '#'
+        when '#'
           n = code.count("\n") + (rspace ? 1 : 0)
           if trim
             add_code("\n" * n)
@@ -116,9 +123,9 @@ module Erubi
             add_code("\n" * n)
             add_text(rspace) if rspace
           end
-        elsif ch == '%'
+        when '%'
           add_text("#{lspace}#{prefix||='<%'}#{code}#{tailch}#{postfix||='%>'}#{rspace}")
-        else
+        when nil, '-'
           if trim
             add_code("#{lspace}#{code}#{rspace}")
           else
@@ -126,6 +133,8 @@ module Erubi
             add_code(code)
             add_text(rspace) if rspace
           end
+        else
+          handle(indicator, code, tailch, rspace, lspace)
         end
       end
       rest = pos == 0 ? input : input[pos..-1]
@@ -147,6 +156,11 @@ module Erubi
     def add_code(code)
       @src << code
       @src << ';' unless code[RANGE_LAST] == "\n"
+    end
+
+    # Raise an exception, as the base engine class does not support handling other indicators.
+    def handle(indicator, code, tailch, rspace, lspace)
+      raise ArgumentError, "Invalid indicator: #{indicator}"
     end
   end
 end

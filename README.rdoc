@@ -45,6 +45,23 @@ source:
   require 'erubi'
   eval(Erubi::Engine.new(File.read('filename.erb')).src)
 
+== Capturing
+
+Erubi does not support capturing block output into the template by default.
+However, it comes with an +erubi/capture+ file that supports capturing
+via <tt><%|=</tt> and <tt><%|==</tt> tags:
+
+  <%|= form do %>
+    <input>
+  <% end %>
+
+This offers similar functionality to that offered by Rails' <tt><%=</tt>
+tags, but without the corner cases with that approach (which are due to
+attempting to parse ruby code via a regexp).  Similar to the <tt><%=</tt>
+and <tt><%==</tt> tags, <tt><%|=</tt> captures by default and
+<tt><%|==</tt> captures and escapes by default, but this can be reversed
+via the +:escape_capture+ or +:escape+ options.
+
 = Reporting Bugs
 
 The bug tracker is located at https://github.com/jeremyevans/erubi/issues
