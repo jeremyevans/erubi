@@ -1,5 +1,7 @@
 === HEAD
 
+* Add :ensure option to supporting restoring bufvar to original value (jeremyevans)
+
 * Don't have tilt support require erb (jeremyevans)
 
 * Support :engine_class option in tilt support to override engine class used (jeremyevans)

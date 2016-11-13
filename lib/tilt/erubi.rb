@@ -6,7 +6,7 @@ module Tilt
   # Erubi (a simplified version of Erubis) template implementation
   class ErubiTemplate < Template
     def prepare
-      @options.merge!(:preamble => false, :postamble => false)
+      @options.merge!(:preamble => false, :postamble => false, :ensure=>true)
 
       engine_class = if @options[:engine_class]
         @options[:engine_class]

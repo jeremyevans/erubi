@@ -33,6 +33,7 @@ module Erubi
     # Initialize a new Erubi::Engine.  Options:
     # :bufval :: The value to use for the buffer variable, as a string.
     # :bufvar :: The variable name to use for the buffer variable, as a string.
+    # :ensure :: Wrap the template in a begin/ensure block restoring the previous value of bufvar.
     # :escapefunc :: The function to use for escaping, as a string (default: ::Erubi.h).
     # :escape :: Whether to make <%= escape by default, and <%== not escape by default.
     # :escape_html :: Same as :escape, with lower priority.
@@ -56,6 +57,7 @@ module Erubi
 
       @src = src = properties[:src] || String.new
       src << "# frozen_string_literal: true\n" if properties[:freeze]
+      src << "begin; __original_outvar = #{bufvar} if defined?(#{bufvar}); " if properties[:ensure]
 
       unless escapefunc = properties[:escapefunc]
         if escape
@@ -142,6 +144,7 @@ module Erubi
 
       src << "\n" unless src[RANGE_LAST] == "\n"
       src << postamble
+      src << "; ensure\n  #{bufvar} = __original_outvar\nend\n" if properties[:ensure]
       freeze
     end
 

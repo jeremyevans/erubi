@@ -93,6 +93,56 @@ END2
 END3
   end
 
+  it "should handle ensure option" do
+    list = ['&\'<>"2']
+    @options[:ensure] = true
+    @options[:bufvar] = '@a'
+    @a = 'bar'
+    check_output(<<END1, <<END2, <<END3){}
+<table>
+ <tbody>
+  <% i = 0
+     list.each_with_index do |item, i| %>
+  <tr>
+   <td><%= i+1 %></td>
+   <td><%== item %></td>
+  </tr>
+ <% end %>
+ </tbody>
+</table>
+<%== i+1 %>
+END1
+begin; __original_outvar = @a if defined?(@a); @a = String.new; @a << '<table>
+ <tbody>
+';   i = 0
+     list.each_with_index do |item, i| 
+ @a << '  <tr>
+   <td>'; @a << ( i+1 ).to_s; @a << '</td>
+   <td>'; @a << ::Erubi.h(( item )); @a << '</td>
+  </tr>
+';  end 
+ @a << ' </tbody>
+</table>
+'; @a << ::Erubi.h(( i+1 )); @a << '
+';
+@a.to_s
+; ensure
+  @a = __original_outvar
+end
+END2
+<table>
+ <tbody>
+  <tr>
+   <td>1</td>
+   <td>&amp;&#039;&lt;&gt;&quot;2</td>
+  </tr>
+ </tbody>
+</table>
+1
+END3
+    @a.must_equal 'bar'
+  end
+
   [['', false], ['=', true]].each do |ind, escape|
     it "should allow <%|=#{ind} for capturing without escaping when :escape_capture => #{escape}" do
       @options[:bufvar] = '@a'
@@ -479,11 +529,13 @@ END2
 
   it "should have working tilt support for specifying engine class" do
     setup_foo
+    @a = 1
     Tilt::ErubiTemplate.new(:engine_class=>Erubi::CaptureEngine, :outvar=>'@a'){<<END1}.render(self).must_equal(<<END2)
 1<%|= @foo.bar do %>bar<% end %>2
 END1
 1ABARB2
 END2
+    @a.must_equal 1
   end
 
   it "should have working tilt support for locals" do
