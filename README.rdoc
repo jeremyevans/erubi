@@ -7,7 +7,8 @@ the following differences:
 * Supports frozen_string_literal: true in templates via :freeze option
 * Works with ruby's --enable-frozen-string-literal option
 * Escapes ' (apostrophe) when escaping for better XSS protection 
-* Has 90% smaller memory footprint
+* Has 90% smaller memory footprint for base engine
+* Has 75% smaller memory footprint for tilt support
 * Does no monkey patching (Erubis adds a method to Kernel)
 * Uses an immutable design (all options passed to the constructor, which returns a frozen object)
 * Has simpler internals (1 file, <100 lines of code)
@@ -18,7 +19,6 @@ It is not designed with Erubis API compatibility in mind, though most Erubis
 ERB syntax works, with the following exceptions:
 
 * No support for <tt><%===</tt> for debug output
-* No support for custom patterns
 
 = Installation
 
@@ -30,7 +30,7 @@ Source code is available on GitHub at https://github.com/jeremyevans/erubi
 
 = Usage
 
-The expected usage is via tilt, and erubi ships with tilt integration:
+The expected usage is via tilt, and erubi ships with tilt 2 integration:
 
   require 'tilt/erubi'
   Tilt.new("filename.erb").render
