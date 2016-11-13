@@ -2,11 +2,12 @@
 
 module Erubi
   ESCAPE_TABLE = {'&' => '&amp;'.freeze, '<' => '&lt;'.freeze, '>' => '&gt;'.freeze, '"' => '&quot;'.freeze, "'" => '&#039;'.freeze}.freeze
-  RANGE_FIRST = 0..0
   RANGE_ALL = 0..-1
-  RANGE_LAST = -1..-1
 
   if RUBY_VERSION >= '1.9'
+    RANGE_FIRST = 0
+    RANGE_LAST = -1
+
     # Escape the following characters with their HTML/XML
     # equivalents.
     def self.h(value)
@@ -14,6 +15,9 @@ module Erubi
     end
   else
     # :nocov:
+    RANGE_FIRST = 0..0
+    RANGE_LAST = -1..-1
+
     def self.h(value)
       value.to_s.gsub(/[&<>"']/){|s| ESCAPE_TABLE[s]}
     end
