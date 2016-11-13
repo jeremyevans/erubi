@@ -1,5 +1,11 @@
 === HEAD
 
+* Don't have tilt support require erb (jeremyevans)
+
+* Support :engine_class option in tilt support to override engine class used (jeremyevans)
+
+* Support :capture option in tilt support to use Erubi::CaptureEngine (jeremyevans)
+
 * Add erubi/capture file containing Erubi::CaptureEngine, allowing <%|= and <%|== for capture (and escaping) blocks in templates (jeremyevans)
 
 * Raise ArgumentError if template source code contains indicators matched by regexp but not handled (jeremyevans)

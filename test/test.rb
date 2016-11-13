@@ -23,6 +23,7 @@ end
 
 require 'erubi'
 require 'erubi/capture'
+require 'tilt/erubi'
 require 'minitest/spec'
 require 'minitest/autorun'
 
@@ -35,6 +36,18 @@ describe Erubi::Engine do
     t = (@options[:engine] || Erubi::Engine).new(input, @options)
     eval(t.src, block.binding).must_equal result
     t.src.must_equal src
+  end
+
+  def setup_foo
+    @foo = Object.new
+    @foo.instance_variable_set(:@t, self)
+    def self.a; @a; end
+    def @foo.bar
+      @t.a << "a"
+      yield
+      @t.a << 'b'
+      @t.a.buffer.upcase!
+    end
   end
 
   it "should handle no options" do
@@ -87,15 +100,11 @@ END3
       @options[:escape_capture] = escape
       @options[:escape] = !escape
       @options[:engine] = ::Erubi::CaptureEngine
-      @b = b = 1
-      foo = Object.new
-      foo.instance_variable_set(:@t, self)
-      def self.a; @a; end
-      def foo.bar; @t.a << "a"; yield; @t.a << 'b'; @t.a.buffer.upcase! end
+      setup_foo
       check_output(<<END1, <<END2, <<END3){}
 <table>
  <tbody>
-  <%|=#{ind} foo.bar do %>
+  <%|=#{ind} @foo.bar do %>
   <tr>
    <td><%=#{ind} 1 %></td>
    <td><%=#{ind} '&' %></td>
@@ -106,7 +115,7 @@ END3
 END1
 #{'__erubi = ::Erubi;' unless escape}@a = ::Erubi::Buffer.new; @a << '<table>
  <tbody>
-'; @a << '  '; @a.before_append!; @a.append=  foo.bar do  @a << '
+'; @a << '  '; @a.before_append!; @a.append=  @foo.bar do  @a << '
 '; @a << '  <tr>
    <td>'; @a << #{!escape ? '__erubi' : '::Erubi'}.h(( 1 )); @a << '</td>
    <td>'; @a << #{!escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</td>
@@ -136,15 +145,11 @@ END3
       @options[:capture] = true
       @options[:escape] = escape
       @options[:engine] = ::Erubi::CaptureEngine
-      @b = b = 1
-      foo = Object.new
-      foo.instance_variable_set(:@t, self)
-      def self.a; @a; end
-      def foo.bar; @t.a << "a"; yield; @t.a << 'b'; @t.a.buffer.upcase! end
+      setup_foo
       check_output(<<END1, <<END2, <<END3){}
 <table>
  <tbody>
-  <%|=#{ind} foo.bar do %>
+  <%|=#{ind} @foo.bar do %>
    <b><%=#{ind} '&' %></b>
  <% end %>
  </tbody>
@@ -152,7 +157,7 @@ END3
 END1
 #{'__erubi = ::Erubi;' if escape}@a = ::Erubi::Buffer.new; @a << '<table>
  <tbody>
-'; @a << '  '; @a.before_append!; @a.escape=  foo.bar do  @a << '
+'; @a << '  '; @a.before_append!; @a.escape=  @foo.bar do  @a << '
 '; @a << '   <b>'; @a << #{escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</b>
 ';  end 
  @a << ' </tbody>
@@ -436,7 +441,6 @@ END3
   end
 
   it "should have working tilt support" do
-    require 'tilt/erubi'
     @list = ['&\'<>"2']
     Tilt::ErubiTemplate.new{<<END1}.render(self).must_equal(<<END2)
 <table>
@@ -461,6 +465,32 @@ END1
  </tbody>
 </table>
 1
+END2
+  end
+
+  it "should have working tilt support for capturing" do
+    setup_foo
+    Tilt::ErubiTemplate.new(:capture=>true, :outvar=>'@a'){<<END1}.render(self).must_equal(<<END2)
+1<%|= @foo.bar do %>bar<% end %>2
+END1
+1ABARB2
+END2
+  end
+
+  it "should have working tilt support for specifying engine class" do
+    setup_foo
+    Tilt::ErubiTemplate.new(:engine_class=>Erubi::CaptureEngine, :outvar=>'@a'){<<END1}.render(self).must_equal(<<END2)
+1<%|= @foo.bar do %>bar<% end %>2
+END1
+1ABARB2
+END2
+  end
+
+  it "should have working tilt support for locals" do
+    Tilt::ErubiTemplate.new{<<END1}.render(self, :b=>3).must_equal(<<END2)
+<%= b %>
+END1
+3
 END2
   end
 end
