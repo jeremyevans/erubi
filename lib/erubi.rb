@@ -63,12 +63,12 @@ module Erubi
       src << "# frozen_string_literal: true\n" if properties[:freeze]
       src << "begin; __original_outvar = #{bufvar} if defined?(#{bufvar}); " if properties[:ensure]
 
-      unless escapefunc = properties[:escapefunc]
+      unless @escapefunc = properties[:escapefunc]
         if escape
-          escapefunc = '__erubi.h'
+          @escapefunc = '__erubi.h'
           src << "__erubi = ::Erubi;"
         else
-          escapefunc = '::Erubi.h'
+          @escapefunc = '::Erubi.h'
         end
       end
 
@@ -115,9 +115,9 @@ module Erubi
           rspace = nil if tailch && !tailch.empty?
           add_text(lspace) if lspace
           if ((indicator == '=') ^ escape)
-            src << " #{bufvar} << (" << code << ').to_s;'
+            add_expression_result(code)
           else
-            src << " #{bufvar} << #{escapefunc}((" << code << '));'
+            add_expression_result_escaped(code)
           end
           add_text(rspace) if rspace
         when '#'
@@ -163,6 +163,16 @@ module Erubi
     def add_code(code)
       @src << code
       @src << ';' unless code[RANGE_LAST] == "\n"
+    end
+
+    # Add the result of Ruby expression to the template
+    def add_expression_result(code)
+      @src << " #{bufvar} << (" << code << ').to_s;'
+    end
+
+    # Add the escaped result of Ruby expression to the template
+    def add_expression_result_escaped(code)
+      @src << " #{bufvar} << #{@escapefunc}((" << code << '));'
     end
 
     # Raise an exception, as the base engine class does not support handling other indicators.
