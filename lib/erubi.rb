@@ -167,12 +167,12 @@ module Erubi
 
     # Add the result of Ruby expression to the template
     def add_expression_result(code)
-      @src << " #{bufvar} << (" << code << ').to_s;'
+      @src << " #{@bufvar} << (" << code << ').to_s;'
     end
 
     # Add the escaped result of Ruby expression to the template
     def add_expression_result_escaped(code)
-      @src << " #{bufvar} << #{@escapefunc}((" << code << '));'
+      @src << " #{@bufvar} << #{@escapefunc}((" << code << '));'
     end
 
     # Raise an exception, as the base engine class does not support handling other indicators.
