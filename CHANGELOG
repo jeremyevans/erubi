@@ -1,3 +1,7 @@
+=== HEAD
+
+* Allow overriding of behavior for <%= and <%== tags (ujifgc) (#1)
+
 === 1.1.0 (2016-11-14)
 
 * Add :ensure option to supporting restoring bufvar to original value (jeremyevans)
