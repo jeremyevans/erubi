@@ -27,7 +27,7 @@ module Erubi
   end
 
   class Engine
-    # The ruby source code generated from the template, which can be evaled.
+    # The frozen ruby source code generated from the template, which can be evaled.
     attr_reader :src
 
     # The filename of the template, if one was given.
@@ -151,6 +151,7 @@ module Erubi
       src << "\n" unless src[RANGE_LAST] == "\n"
       src << postamble
       src << "; ensure\n  #{bufvar} = __original_outvar\nend\n" if properties[:ensure]
+      src.freeze
       freeze
     end
 

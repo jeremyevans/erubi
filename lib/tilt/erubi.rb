@@ -18,11 +18,12 @@ module Tilt
 
       @engine = engine_class.new(data, @options)
       @outvar = @engine.bufvar
+      @src = @engine.src.dup
       @engine
     end
 
     def precompiled_template(locals)
-      @engine.src
+      @src
     end
 
     Tilt.register self, 'erb', 'rhtml', 'erubi'

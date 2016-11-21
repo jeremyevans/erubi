@@ -485,6 +485,10 @@ END3
     Erubi::Engine.new('').frozen?.must_equal true
   end
 
+  it "should have frozen src" do
+    Erubi::Engine.new('').src.frozen?.must_equal true
+  end
+
   it "should raise an error if a tag is not handled when a custom regexp is used" do
     proc{Erubi::Engine.new('<%] %>', :regexp =>/<%(={1,2}|\]|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m)}.must_raise ArgumentError
     proc{Erubi::CaptureEngine.new('<%] %>', :regexp =>/<%(={1,2}|\]|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m)}.must_raise ArgumentError

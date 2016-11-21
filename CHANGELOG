@@ -1,5 +1,7 @@
 === HEAD
 
+* Engine#src now returns a frozen string (jeremyevans)
+
 * Automatically freeze template text strings on ruby 2.1+, reducing garbage generated (jeremyevans)
 
 * Allow overriding of behavior for <%= and <%== tags (ujifgc) (#1)
