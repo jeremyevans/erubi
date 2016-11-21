@@ -6,6 +6,7 @@ the following differences:
 * Handles postfix conditionals when using escaping (e.g. <tt><%= foo if bar %></tt>)
 * Supports frozen_string_literal: true in templates via :freeze option
 * Works with ruby's --enable-frozen-string-literal option
+* Automatically freezes strings for template text when ruby optimizes it (on ruby 2.1+)
 * Escapes ' (apostrophe) when escaping for better XSS protection 
 * Has 90% smaller memory footprint for base engine
 * Has 75% smaller memory footprint for tilt support

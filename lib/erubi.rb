@@ -7,6 +7,7 @@ module Erubi
   if RUBY_VERSION >= '1.9'
     RANGE_FIRST = 0
     RANGE_LAST = -1
+    TEXT_END = "'.freeze;"
 
     # Escape the following characters with their HTML/XML
     # equivalents.
@@ -17,6 +18,7 @@ module Erubi
     # :nocov:
     RANGE_FIRST = 0..0
     RANGE_LAST = -1..-1
+    TEXT_END = "';"
 
     def self.h(value)
       value.to_s.gsub(/[&<>"']/){|s| ESCAPE_TABLE[s]}
@@ -156,7 +158,7 @@ module Erubi
 
     # Add raw text to the template
     def add_text(text)
-      @src << " #{@bufvar} << '" << text.gsub(/['\\]/, '\\\\\&') << "';" unless text.empty?
+      @src << " #{@bufvar} << '" << text.gsub(/['\\]/, '\\\\\&') << TEXT_END unless text.empty?
     end
 
     # Add ruby code to the template

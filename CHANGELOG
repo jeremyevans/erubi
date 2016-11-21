@@ -1,5 +1,7 @@
 === HEAD
 
+* Automatically freeze template text strings on ruby 2.1+, reducing garbage generated (jeremyevans)
+
 * Allow overriding of behavior for <%= and <%== tags (ujifgc) (#1)
 
 === 1.1.0 (2016-11-14)
