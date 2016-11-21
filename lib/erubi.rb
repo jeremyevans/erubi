@@ -7,7 +7,7 @@ module Erubi
   if RUBY_VERSION >= '1.9'
     RANGE_FIRST = 0
     RANGE_LAST = -1
-    TEXT_END = "'.freeze;"
+    TEXT_END = RUBY_VERSION >= '2.1' ? "'.freeze;" : "';"
 
     # Escape the following characters with their HTML/XML
     # equivalents.

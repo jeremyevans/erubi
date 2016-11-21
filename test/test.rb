@@ -35,7 +35,9 @@ describe Erubi::Engine do
   def check_output(input, src, result, &block)
     t = (@options[:engine] || Erubi::Engine).new(input, @options)
     eval(t.src, block.binding).must_equal result
-    t.src.gsub("'.freeze;", "';").must_equal src
+    tsrc = t.src
+    tsrc = tsrc.gsub("'.freeze;", "';") if RUBY_VERSION >= '2.1'
+    tsrc.must_equal src
   end
 
   def setup_foo

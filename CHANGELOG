@@ -1,3 +1,7 @@
+=== 1.2.1 (2016-11-21)
+
+* Don't automatically freeze template text strings on ruby 1.9 or 2.0 (jeremyevans)
+
 === 1.2.0 (2016-11-21)
 
 * Engine#src now returns a frozen string (jeremyevans)
