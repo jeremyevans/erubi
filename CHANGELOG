@@ -1,4 +1,4 @@
-=== HEAD
+=== 1.2.0 (2016-11-21)
 
 * Engine#src now returns a frozen string (jeremyevans)
 
