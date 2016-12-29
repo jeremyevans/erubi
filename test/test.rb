@@ -23,6 +23,7 @@ end
 
 require 'erubi'
 require 'erubi/capture'
+require 'erubi/capture_end'
 require 'tilt/erubi'
 require 'minitest/spec'
 require 'minitest/autorun'
@@ -34,8 +35,8 @@ describe Erubi::Engine do
 
   def check_output(input, src, result, &block)
     t = (@options[:engine] || Erubi::Engine).new(input, @options)
-    eval(t.src, block.binding).must_equal result
     tsrc = t.src
+    eval(tsrc, block.binding).must_equal result
     tsrc = tsrc.gsub("'.freeze;", "';") if RUBY_VERSION >= '2.1'
     tsrc.must_equal src
   end
@@ -49,6 +50,21 @@ describe Erubi::Engine do
       yield
       @t.a << 'b'
       @t.a.buffer.upcase!
+    end
+  end
+
+  def setup_bar
+    def self.bar
+      @a << "a"
+      yield
+      @a << 'b'
+      @a.upcase
+    end
+    def self.baz
+      @a << "c"
+      yield
+      @a << 'd'
+      @a * 2
     end
   end
 
@@ -146,7 +162,7 @@ END3
   end
 
   [['', false], ['=', true]].each do |ind, escape|
-    it "should allow <%|=#{ind} for capturing without escaping when :escape_capture => #{escape}" do
+    it "should allow <%|=#{ind} for capturing with CaptureEngine with :escape_capture => #{escape} and :escape => #{escape}" do
       @options[:bufvar] = '@a'
       @options[:capture] = true
       @options[:escape_capture] = escape
@@ -192,7 +208,7 @@ END3
   end
 
   [['', true], ['=', false]].each do |ind, escape|
-    it "should allow <%|=#{ind} for capturing with escaping when :escape => #{escape}" do
+    it "should allow <%|=#{ind} for capturing with CaptureEngine with :escape => #{escape}" do
       @options[:bufvar] = '@a'
       @options[:capture] = true
       @options[:escape] = escape
@@ -222,6 +238,119 @@ END2
   A
    &lt;B&gt;&amp;AMP;&lt;/B&gt;
 B </tbody>
+</table>
+END3
+    end
+  end
+
+  [['', false], ['=', true]].each do |ind, escape|
+    it "should allow <%|=#{ind} and <%| for capturing with CaptureEndEngine with :escape_capture => #{escape} and :escape => #{!escape}" do
+      @options[:bufvar] = '@a'
+      @options[:capture] = true
+      @options[:escape_capture] = escape
+      @options[:escape] = !escape
+      @options[:engine] = ::Erubi::CaptureEndEngine
+      setup_bar
+      check_output(<<END1, <<END2, <<END3){}
+<table>
+ <tbody>
+  <%|=#{ind} bar do %>
+   <b><%=#{ind} '&' %></b>
+ <%| end %>
+ </tbody>
+</table>
+END1
+#{'__erubi = ::Erubi;' unless escape}@a = String.new; @a << '<table>
+ <tbody>
+'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << #{!escape ? '__erubi' : '::Erubi'}.h(( bar do  @a << '
+'; @a << '   <b>'; @a << #{!escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</b>
+'; @a << ' '; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
+'; @a << ' </tbody>
+</table>
+';
+@a.to_s
+END2
+<table>
+ <tbody>
+  A
+   &lt;B&gt;&amp;AMP;&lt;/B&gt;
+ B
+ </tbody>
+</table>
+END3
+    end
+  end
+
+  [['', true], ['=', false]].each do |ind, escape|
+    it "should allow <%|=#{ind} and <%| for capturing with CaptureEndEngine when with :escape => #{escape}" do
+      @options[:bufvar] = '@a'
+      @options[:capture] = true
+      @options[:escape] = escape
+      @options[:engine] = ::Erubi::CaptureEndEngine
+      setup_bar
+      check_output(<<END1, <<END2, <<END3){}
+<table>
+ <tbody>
+  <%|=#{ind} bar do %>
+   <b><%=#{ind} '&' %></b>
+ <%| end %>
+ </tbody>
+</table>
+END1
+#{'__erubi = ::Erubi;' if escape}@a = String.new; @a << '<table>
+ <tbody>
+'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << (( bar do  @a << '
+'; @a << '   <b>'; @a << #{escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</b>
+'; @a << ' '; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
+'; @a << ' </tbody>
+</table>
+';
+@a.to_s
+END2
+<table>
+ <tbody>
+  A
+   <B>&AMP;</B>
+ B
+ </tbody>
+</table>
+END3
+    end
+
+    it "should allow <%|=#{ind} and <%| for nested capturing with CaptureEndEngine when with :escape => #{escape}" do
+      @options[:bufvar] = '@a'
+      @options[:capture] = true
+      @options[:escape] = escape
+      @options[:engine] = ::Erubi::CaptureEndEngine
+      setup_bar
+      check_output(<<END1, <<END2, <<END3){}
+<table>
+ <tbody>
+  <%|=#{ind} bar do %>
+   <b><%=#{ind} '&' %></b>
+   <%|=#{ind} baz do %>e<%| end %>
+ <%| end %>
+ </tbody>
+</table>
+END1
+#{'__erubi = ::Erubi;' if escape}@a = String.new; @a << '<table>
+ <tbody>
+'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << (( bar do  @a << '
+'; @a << '   <b>'; @a << #{escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</b>
+'; @a << '   ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << (( baz do  @a << 'e'; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
+'; @a << ' '; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
+'; @a << ' </tbody>
+</table>
+';
+@a.to_s
+END2
+<table>
+ <tbody>
+  A
+   <B>&AMP;</B>
+   CEDCED
+ B
+ </tbody>
 </table>
 END3
     end
@@ -530,6 +659,15 @@ END2
 1<%|= @foo.bar do %>bar<% end %>2
 END1
 1ABARB2
+END2
+  end
+
+  it "should have working tilt support for explicit capturing" do
+    setup_bar
+    Tilt::ErubiTemplate.new(:capture=>:explicit, :outvar=>'@a'){<<END1}.render(self).must_equal(<<END2)
+1<%|= bar do %>b<%|= baz do %>e<%| end %>ar<%| end %>2
+END1
+1ABCEDCEDARB2
 END2
   end
 

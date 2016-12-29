@@ -10,8 +10,12 @@ module Tilt
 
       engine_class = if @options[:engine_class]
         @options[:engine_class]
-      elsif @options[:capture]
-        Erubi::CaptureEngine
+      elsif capture = @options[:capture]
+        if capture == :explicit
+          Erubi::CaptureEndEngine
+        else
+          Erubi::CaptureEngine
+        end
       else
         Erubi::Engine
       end
