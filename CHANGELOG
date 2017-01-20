@@ -1,5 +1,7 @@
 === master
 
+* Allow postambles to depend on internal state of engine (jeremyevans)
+
 * Allow overriding of behavior for <%= and <%== tags to depend on which indicator was used (jeremyevans)
 
 * Make whitespace handling for <% %> tags more compatible with Erubis for subclasses overriding add_text (jeremyevans)

@@ -145,7 +145,7 @@ module Erubi
       add_text(rest)
 
       src << "\n" unless src[RANGE_LAST] == "\n"
-      src << postamble
+      add_postamble(postamble)
       src << "; ensure\n  #{bufvar} = __original_outvar\nend\n" if properties[:ensure]
       src.freeze
       freeze
@@ -182,6 +182,12 @@ module Erubi
     # Add the escaped result of Ruby expression to the template
     def add_expression_result_escaped(code)
       @src << " #{@bufvar} << #{@escapefunc}((" << code << '));'
+    end
+
+    # Add the given postamble to the src.  Can be overridden in subclasses
+    # to make additional changes to src that depend on the current state.
+    def add_postamble(postamble)
+      src << postamble
     end
 
     # Raise an exception, as the base engine class does not support handling other indicators.
