@@ -8,11 +8,11 @@ the following differences:
 * Works with ruby's --enable-frozen-string-literal option
 * Automatically freezes strings for template text when ruby optimizes it (on ruby 2.1+)
 * Escapes ' (apostrophe) when escaping for better XSS protection 
-* Has 90% smaller memory footprint for base engine
+* Has 88% smaller memory footprint for base engine
 * Has 75% smaller memory footprint for tilt support
 * Does no monkey patching (Erubis adds a method to Kernel)
 * Uses an immutable design (all options passed to the constructor, which returns a frozen object)
-* Has simpler internals (1 file, <100 lines of code)
+* Has simpler internals (1 file, <150 lines of code)
 * Has an open development model (Erubis doesn't have a public source control repository or bug tracker)
 * Is not dead (Erubis hasn't been updated since 2011)
 
@@ -49,12 +49,12 @@ source:
 == Capturing
 
 Erubi does not support capturing block output into the template by default.
-However, it comes with an +erubi/capture+ file that supports capturing
-via <tt><%|=</tt> and <tt><%|==</tt> tags:
+However, it comes with an +erubi/capture_end+ file that supports capturing
+via <tt><%|=</tt>, <tt><%|==</tt>, <tt><%|</tt> tags:
 
   <%|= form do %>
     <input>
-  <% end %>
+  <%| end %>
 
 This offers similar functionality to that offered by Rails' <tt><%=</tt>
 tags, but without the corner cases with that approach (which are due to
