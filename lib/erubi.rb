@@ -52,7 +52,7 @@ module Erubi
     # :src :: The initial value to use for the source code
     # :trim :: Whether to trim leading and trailing whitespace, true by default.
     def initialize(input, properties={})
-      escape     = properties.fetch(:escape){properties.fetch(:escape_html, false)}
+      @escape = escape = properties.fetch(:escape){properties.fetch(:escape_html, false)}
       trim       = properties[:trim] != false
       @filename  = properties[:filename]
       @bufvar = bufvar = properties[:bufvar] || properties[:outvar] || "_buf"
@@ -116,11 +116,7 @@ module Erubi
         when '='
           rspace = nil if tailch && !tailch.empty?
           add_text(lspace) if lspace
-          if ((indicator == '=') ^ escape)
-            add_expression_result(code)
-          else
-            add_expression_result_escaped(code)
-          end
+          add_expression(indicator, code)
           add_text(rspace) if rspace
         when '#'
           n = code.count("\n") + (rspace ? 1 : 0)
@@ -166,6 +162,16 @@ module Erubi
     def add_code(code)
       @src << code
       @src << ';' unless code[RANGE_LAST] == "\n"
+    end
+
+    # Add the given ruby expression result to the template,
+    # escaping it based on the indicator given and escape flag.
+    def add_expression(indicator, code)
+      if ((indicator == '=') ^ @escape)
+        add_expression_result(code)
+      else
+        add_expression_result_escaped(code)
+      end
     end
 
     # Add the result of Ruby expression to the template
