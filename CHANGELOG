@@ -1,4 +1,4 @@
-=== master
+=== 1.4.0 (2017-01-20)
 
 * Allow postambles to depend on internal state of engine (jeremyevans)
 
