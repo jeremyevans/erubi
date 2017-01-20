@@ -134,7 +134,7 @@ module Erubi
         when '%'
           add_text("#{lspace}#{prefix||='<%'}#{code}#{tailch}#{postfix||='%>'}#{rspace}")
         when nil, '-'
-          if trim
+          if trim && lspace && rspace
             add_code("#{lspace}#{code}#{rspace}")
           else
             add_text(lspace) if lspace

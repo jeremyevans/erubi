@@ -1,3 +1,7 @@
+=== master
+
+* Make whitespace handling for <% %> tags more compatible with Erubis for subclasses overriding add_text (jeremyevans)
+
 === 1.3.0 (2016-12-29)
 
 * Support :capture=>:explicit option in tilt support to use Erubi::CaptureEndEngine (jeremyevans)
