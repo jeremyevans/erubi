@@ -22,9 +22,7 @@ if ENV['COVERAGE']
 end
 
 require 'erubi'
-require 'erubi/capture'
 require 'erubi/capture_end'
-require 'tilt/erubi'
 require 'minitest/spec'
 require 'minitest/autorun'
 
@@ -162,88 +160,6 @@ END3
   end
 
   [['', false], ['=', true]].each do |ind, escape|
-    it "should allow <%|=#{ind} for capturing with CaptureEngine with :escape_capture => #{escape} and :escape => #{escape}" do
-      @options[:bufvar] = '@a'
-      @options[:capture] = true
-      @options[:escape_capture] = escape
-      @options[:escape] = !escape
-      @options[:engine] = ::Erubi::CaptureEngine
-      setup_foo
-      check_output(<<END1, <<END2, <<END3){}
-<table>
- <tbody>
-  <%|=#{ind} @foo.bar do %>
-  <tr>
-   <td><%=#{ind} 1 %></td>
-   <td><%=#{ind} '&' %></td>
-  </tr>
- <% end %>
- </tbody>
-</table>
-END1
-#{'__erubi = ::Erubi;' unless escape}@a = ::Erubi::Buffer.new; @a << '<table>
- <tbody>
-'; @a << '  '; @a.before_append!; @a.append=  @foo.bar do  @a << '
-'; @a << '  <tr>
-   <td>'; @a << #{!escape ? '__erubi' : '::Erubi'}.h(( 1 )); @a << '</td>
-   <td>'; @a << #{!escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</td>
-  </tr>
-';  end 
- @a << ' </tbody>
-</table>
-';
-@a.to_s
-END2
-<table>
- <tbody>
-  A
-  <TR>
-   <TD>1</TD>
-   <TD>&AMP;</TD>
-  </TR>
-B </tbody>
-</table>
-END3
-    end
-  end
-
-  [['', true], ['=', false]].each do |ind, escape|
-    it "should allow <%|=#{ind} for capturing with CaptureEngine with :escape => #{escape}" do
-      @options[:bufvar] = '@a'
-      @options[:capture] = true
-      @options[:escape] = escape
-      @options[:engine] = ::Erubi::CaptureEngine
-      setup_foo
-      check_output(<<END1, <<END2, <<END3){}
-<table>
- <tbody>
-  <%|=#{ind} @foo.bar do %>
-   <b><%=#{ind} '&' %></b>
- <% end %>
- </tbody>
-</table>
-END1
-#{'__erubi = ::Erubi;' if escape}@a = ::Erubi::Buffer.new; @a << '<table>
- <tbody>
-'; @a << '  '; @a.before_append!; @a.escape=  @foo.bar do  @a << '
-'; @a << '   <b>'; @a << #{escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</b>
-';  end 
- @a << ' </tbody>
-</table>
-';
-@a.to_s
-END2
-<table>
- <tbody>
-  A
-   &lt;B&gt;&amp;AMP;&lt;/B&gt;
-B </tbody>
-</table>
-END3
-    end
-  end
-
-  [['', false], ['=', true]].each do |ind, escape|
     it "should allow <%|=#{ind} and <%| for capturing with CaptureEndEngine with :escape_capture => #{escape} and :escape => #{!escape}" do
       @options[:bufvar] = '@a'
       @options[:capture] = true
@@ -284,7 +200,6 @@ END3
   [['', true], ['=', false]].each do |ind, escape|
     it "should allow <%|=#{ind} and <%| for capturing with CaptureEndEngine when with :escape => #{escape}" do
       @options[:bufvar] = '@a'
-      @options[:capture] = true
       @options[:escape] = escape
       @options[:engine] = ::Erubi::CaptureEndEngine
       setup_bar
@@ -319,7 +234,6 @@ END3
 
     it "should allow <%|=#{ind} and <%| for nested capturing with CaptureEndEngine when with :escape => #{escape}" do
       @options[:bufvar] = '@a'
-      @options[:capture] = true
       @options[:escape] = escape
       @options[:engine] = ::Erubi::CaptureEndEngine
       setup_bar
@@ -622,71 +536,6 @@ END3
 
   it "should raise an error if a tag is not handled when a custom regexp is used" do
     proc{Erubi::Engine.new('<%] %>', :regexp =>/<%(={1,2}|\]|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m)}.must_raise ArgumentError
-    proc{Erubi::CaptureEngine.new('<%] %>', :regexp =>/<%(={1,2}|\]|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m)}.must_raise ArgumentError
-  end
-
-  it "should have working tilt support" do
-    @list = ['&\'<>"2']
-    Tilt::ErubiTemplate.new{<<END1}.render(self).must_equal(<<END2)
-<table>
- <tbody>
-  <% i = 0
-     @list.each_with_index do |item, i| %>
-  <tr>
-   <td><%= i+1 %></td>
-   <td><%== item %></td>
-  </tr>
- <% end %>
- </tbody>
-</table>
-<%== i+1 %>
-END1
-<table>
- <tbody>
-  <tr>
-   <td>1</td>
-   <td>&amp;&#039;&lt;&gt;&quot;2</td>
-  </tr>
- </tbody>
-</table>
-1
-END2
-  end
-
-  it "should have working tilt support for capturing" do
-    setup_foo
-    Tilt::ErubiTemplate.new(:capture=>true, :outvar=>'@a'){<<END1}.render(self).must_equal(<<END2)
-1<%|= @foo.bar do %>bar<% end %>2
-END1
-1ABARB2
-END2
-  end
-
-  it "should have working tilt support for explicit capturing" do
-    setup_bar
-    Tilt::ErubiTemplate.new(:capture=>:explicit, :outvar=>'@a'){<<END1}.render(self).must_equal(<<END2)
-1<%|= bar do %>b<%|= baz do %>e<%| end %>ar<%| end %>2
-END1
-1ABCEDCEDARB2
-END2
-  end
-
-  it "should have working tilt support for specifying engine class" do
-    setup_foo
-    @a = 1
-    Tilt::ErubiTemplate.new(:engine_class=>Erubi::CaptureEngine, :outvar=>'@a'){<<END1}.render(self).must_equal(<<END2)
-1<%|= @foo.bar do %>bar<% end %>2
-END1
-1ABARB2
-END2
-    @a.must_equal 1
-  end
-
-  it "should have working tilt support for locals" do
-    Tilt::ErubiTemplate.new{<<END1}.render(self, :b=>3).must_equal(<<END2)
-<%= b %>
-END1
-3
-END2
+    proc{Erubi::CaptureEndEngine.new('<%] %>', :regexp =>/<%(={1,2}|\]|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m)}.must_raise ArgumentError
   end
 end

@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'erubi'
-  s.version = '1.4.0'
+  s.version = '1.5.0'
   s.platform = Gem::Platform::RUBY
   s.has_rdoc = true
   s.extra_rdoc_files = ["README.rdoc", "CHANGELOG", "MIT-LICENSE"]
@@ -12,6 +12,5 @@ Gem::Specification.new do |s|
   s.homepage = "https://github.com/jeremyevans/erubi"
   s.files = %w(MIT-LICENSE CHANGELOG README.rdoc Rakefile) + Dir["{test,lib}/**/*.rb"]
   s.description = "Erubi is a ERB template engine for ruby. It is a simplified fork of Erubis"
-  s.add_development_dependency "tilt", '>= 2'
   s.add_development_dependency "minitest"
 end
