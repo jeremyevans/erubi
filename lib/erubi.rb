@@ -147,7 +147,12 @@ module Erubi
       src << "\n" unless src[RANGE_LAST] == "\n"
       add_postamble(postamble)
       src << "; ensure\n  #{bufvar} = __original_outvar\nend\n" if properties[:ensure]
-      src.freeze
+
+      if @src.is_a?(Array)
+        @src = @src.join
+      end
+
+      @src.freeze
       freeze
     end
 
