@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-require 'erubi/version'
-
 module Erubi
+  VERSION = '1.5.0'
   ESCAPE_TABLE = {'&' => '&amp;'.freeze, '<' => '&lt;'.freeze, '>' => '&gt;'.freeze, '"' => '&quot;'.freeze, "'" => '&#039;'.freeze}.freeze
   RANGE_ALL = 0..-1
 
