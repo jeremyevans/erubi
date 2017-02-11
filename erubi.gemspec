@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+require File.expand_path("../lib/erubi/version", __FILE__)
+
 Gem::Specification.new do |s|
   s.name = 'erubi'
-  s.version = '1.5.0'
+  s.version = Erubi::VERSION
   s.platform = Gem::Platform::RUBY
   s.has_rdoc = true
   s.extra_rdoc_files = ["README.rdoc", "CHANGELOG", "MIT-LICENSE"]
