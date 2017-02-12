@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require File.expand_path("../lib/erubi/version", __FILE__)
+require File.expand_path("../lib/erubi", __FILE__)
 
 Gem::Specification.new do |s|
   s.name = 'erubi'
