@@ -1,30 +1,23 @@
 # frozen_string_literal: true
+require 'erb'
 
 module Erubi
   VERSION = '1.5.0'
-  ESCAPE_TABLE = {'&' => '&amp;'.freeze, '<' => '&lt;'.freeze, '>' => '&gt;'.freeze, '"' => '&quot;'.freeze, "'" => '&#039;'.freeze}.freeze
   RANGE_ALL = 0..-1
 
   if RUBY_VERSION >= '1.9'
     RANGE_FIRST = 0
     RANGE_LAST = -1
     TEXT_END = RUBY_VERSION >= '2.1' ? "'.freeze;" : "';"
-
-    # Escape the following characters with their HTML/XML
-    # equivalents.
-    def self.h(value)
-      value.to_s.gsub(/[&<>"']/, ESCAPE_TABLE)
-    end
   else
     # :nocov:
     RANGE_FIRST = 0..0
     RANGE_LAST = -1..-1
     TEXT_END = "';"
+  end
 
-    def self.h(value)
-      value.to_s.gsub(/[&<>"']/){|s| ESCAPE_TABLE[s]}
-    end
-    # :nocov:
+  def self.h(value)
+    ERB::Util.h(value)
   end
 
   class Engine

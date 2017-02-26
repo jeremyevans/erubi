@@ -101,7 +101,7 @@ END2
  <tbody>
   <tr>
    <td>1</td>
-   <td>&amp;&#039;&lt;&gt;&quot;2</td>
+   <td>&amp;&#39;&lt;&gt;&quot;2</td>
   </tr>
  </tbody>
 </table>
@@ -150,7 +150,7 @@ END2
  <tbody>
   <tr>
    <td>1</td>
-   <td>&amp;&#039;&lt;&gt;&quot;2</td>
+   <td>&amp;&#39;&lt;&gt;&quot;2</td>
   </tr>
  </tbody>
 </table>
@@ -472,7 +472,7 @@ END2
  <tbody>
   <tr>
    <td>1</td>
-   <td>&amp;&#039;&lt;&gt;&quot;2</td>
+   <td>&amp;&#39;&lt;&gt;&quot;2</td>
   </tr>
  </tbody>
 </table>
