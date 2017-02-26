@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'erb'
 
 module Erubi
   VERSION = '1.5.0'
@@ -16,8 +15,24 @@ module Erubi
     TEXT_END = "';"
   end
 
-  def self.h(value)
-    ERB::Util.h(value)
+  begin
+    require 'cgi/escape'
+    def self.h(value)
+      CGI.escapeHTML(value.to_s)
+    end
+  rescue LoadError
+    ESCAPE_TABLE = {'&' => '&amp;'.freeze, '<' => '&lt;'.freeze, '>' => '&gt;'.freeze, '"' => '&quot;'.freeze, "'" => '&#39;'.freeze}.freeze
+    if RUBY_VERSION >= '1.9'
+      # Escape the following characters with their HTML/XML
+      # equivalents.
+      def self.h(value)
+        value.to_s.gsub(/[&<>"']/, ESCAPE_TABLE)
+      end
+    else
+      def self.h(value)
+        value.to_s.gsub(/[&<>"']/){|s| ESCAPE_TABLE[s]}
+      end
+    end
   end
 
   class Engine

@@ -8,7 +8,8 @@ the same basic algorithm, with the following differences:
 * Works with ruby's --enable-frozen-string-literal option
 * Automatically freezes strings for template text when ruby optimizes it (on ruby 2.1+)
 * Escapes ' (apostrophe) when escaping for better XSS protection 
-* Has 88% smaller memory footprint
+* Has 6x faster escaping on ruby 2.3+ by using cgi/escape
+* Has 86% smaller memory footprint
 * Does no monkey patching (Erubis adds a method to Kernel)
 * Uses an immutable design (all options passed to the constructor, which returns a frozen object)
 * Has simpler internals (1 file, <150 lines of code)
