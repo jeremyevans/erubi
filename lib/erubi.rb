@@ -19,7 +19,7 @@ module Erubi
     require 'cgi/escape'
     unless CGI.respond_to?(:escapeHTML) # work around for JRuby 9.1
       CGI = Object.new
-      CGI.extend(::CGI::Util)
+      CGI.extend(defined?(::CGI::Escape) ? ::CGI::Escape : ::CGI::Util)
     end
     def self.h(value)
       CGI.escapeHTML(value.to_s)
