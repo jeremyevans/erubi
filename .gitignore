@@ -1,3 +1,4 @@
 /erubi-*.gem
 /rdoc/
 /coverage/
+Gemfile.lock
