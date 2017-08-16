@@ -93,8 +93,7 @@ module Erubi
       is_bol = true
       input.scan(regexp) do |indicator, code, tailch, rspace|
         match = Regexp.last_match
-        len  = match.begin(0) - pos
-        text = input[pos, len]
+        text = input[pos ... match.begin(0)]
         pos  = match.end(0)
         ch   = indicator ? indicator[RANGE_FIRST] : nil
 
