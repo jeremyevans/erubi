@@ -45,7 +45,8 @@ Rails 5.1+.
 
 Erubi does not support capturing block output into the template by default.
 However, it comes with an +erubi/capture_end+ file that supports capturing
-via <tt><%|=</tt>, <tt><%|==</tt>, <tt><%|</tt> tags:
+via <tt><%|=</tt> and <tt><%|==</tt> tags which are closed with a
+<tt><%|</tt> tag:
 
   <%|= form do %>
     <input>
