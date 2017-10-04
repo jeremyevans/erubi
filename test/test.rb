@@ -64,6 +64,16 @@ describe Erubi::Engine do
       @a << 'd'
       @a * 2
     end
+    def self.quux
+      @a << "a"
+      3.times do |i|
+        @a << "c#{i}"
+        yield i
+        @a << "d#{i}"
+      end
+      @a << "b"
+      @a.upcase
+    end
   end
 
   it "should handle no options" do
@@ -159,6 +169,22 @@ END3
     @a.must_equal 'bar'
   end
 
+  it "should have <%|= with CaptureEndEngine not escape by default" do
+    eval(::Erubi::CaptureEndEngine.new('<%|= "&" %><%| %>').src).must_equal '&'
+    eval(::Erubi::CaptureEndEngine.new('<%|= "&" %><%| %>', :escape=>false).src).must_equal '&'
+    eval(::Erubi::CaptureEndEngine.new('<%|= "&" %><%| %>', :escape_capture=>false).src).must_equal '&'
+    eval(::Erubi::CaptureEndEngine.new('<%|= "&" %><%| %>', :escape=>true).src).must_equal '&amp;'
+    eval(::Erubi::CaptureEndEngine.new('<%|= "&" %><%| %>', :escape_capture=>true).src).must_equal '&amp;'
+  end
+
+  it "should have <%|== with CaptureEndEngine escape by default" do
+    eval(::Erubi::CaptureEndEngine.new('<%|== "&" %><%| %>').src).must_equal '&amp;'
+    eval(::Erubi::CaptureEndEngine.new('<%|== "&" %><%| %>', :escape=>true).src).must_equal '&'
+    eval(::Erubi::CaptureEndEngine.new('<%|== "&" %><%| %>', :escape_capture=>true).src).must_equal '&'
+    eval(::Erubi::CaptureEndEngine.new('<%|== "&" %><%| %>', :escape=>false).src).must_equal '&amp;'
+    eval(::Erubi::CaptureEndEngine.new('<%|== "&" %><%| %>', :escape_capture=>false).src).must_equal '&amp;'
+  end
+
   [['', false], ['=', true]].each do |ind, escape|
     it "should allow <%|=#{ind} and <%| for capturing with CaptureEndEngine with :escape_capture => #{escape} and :escape => #{!escape}" do
       @options[:bufvar] = '@a'
@@ -178,7 +204,7 @@ END3
 END1
 #{'__erubi = ::Erubi;' unless escape}@a = String.new; @a << '<table>
  <tbody>
-'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << #{!escape ? '__erubi' : '::Erubi'}.h(( bar do  @a << '
+'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << (( bar do  @a << '
 '; @a << '   <b>'; @a << #{!escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</b>
 '; @a << ' '; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 '; @a << ' </tbody>
@@ -189,7 +215,7 @@ END2
 <table>
  <tbody>
   A
-   &lt;B&gt;&amp;AMP;&lt;/B&gt;
+   <B>&AMP;</B>
  B
  </tbody>
 </table>
@@ -214,7 +240,7 @@ END3
 END1
 #{'__erubi = ::Erubi;' if escape}@a = String.new; @a << '<table>
  <tbody>
-'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << (( bar do  @a << '
+'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << #{escape ? '__erubi' : '::Erubi'}.h(( bar do  @a << '
 '; @a << '   <b>'; @a << #{escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</b>
 '; @a << ' '; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 '; @a << ' </tbody>
@@ -225,8 +251,46 @@ END2
 <table>
  <tbody>
   A
-   <B>&AMP;</B>
+   &lt;B&gt;&amp;AMP;&lt;/B&gt;
  B
+ </tbody>
+</table>
+END3
+    end
+
+    it "should handle loops in <%|=#{ind} and <%| for capturing with CaptureEndEngine when with :escape => #{escape}" do
+      @options[:bufvar] = '@a'
+      @options[:escape] = escape
+      @options[:engine] = ::Erubi::CaptureEndEngine
+      setup_bar
+      check_output(<<END1, <<END2, <<END3){}
+<table>
+ <tbody>
+  <%|=#{ind} quux do |i| %>
+   <b><%=#{ind} "\#{i}&" %></b>
+ <%| end %>
+ </tbody>
+</table>
+END1
+#{'__erubi = ::Erubi;' if escape}@a = String.new; @a << '<table>
+ <tbody>
+'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << #{escape ? '__erubi' : '::Erubi'}.h(( quux do |i|  @a << '
+'; @a << '   <b>'; @a << #{escape ? '__erubi' : '::Erubi'}.h(( "\#{i}&" )); @a << '</b>
+'; @a << ' '; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
+'; @a << ' </tbody>
+</table>
+';
+@a.to_s
+END2
+<table>
+ <tbody>
+  AC0
+   &lt;B&gt;0&amp;AMP;&lt;/B&gt;
+ D0C1
+   &lt;B&gt;1&amp;AMP;&lt;/B&gt;
+ D1C2
+   &lt;B&gt;2&amp;AMP;&lt;/B&gt;
+ D2B
  </tbody>
 </table>
 END3
@@ -249,9 +313,9 @@ END3
 END1
 #{'__erubi = ::Erubi;' if escape}@a = String.new; @a << '<table>
  <tbody>
-'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << (( bar do  @a << '
+'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << #{escape ? '__erubi' : '::Erubi'}.h(( bar do  @a << '
 '; @a << '   <b>'; @a << #{escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</b>
-'; @a << '   ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << (( baz do  @a << 'e'; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
+'; @a << '   ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << #{escape ? '__erubi' : '::Erubi'}.h(( baz do  @a << 'e'; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 '; @a << ' '; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 '; @a << ' </tbody>
 </table>
@@ -261,7 +325,7 @@ END2
 <table>
  <tbody>
   A
-   <B>&AMP;</B>
+   &lt;B&gt;&amp;AMP;&lt;/B&gt;
    CEDCED
  B
  </tbody>

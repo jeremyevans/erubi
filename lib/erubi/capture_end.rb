@@ -28,7 +28,7 @@ module Erubi
       when '|=', '|=='
         rspace = nil if tailch && !tailch.empty?
         add_text(lspace) if lspace
-        escape_capture = ((indicator == '|=') ^ @escape_capture)
+        escape_capture = !((indicator == '|=') ^ @escape_capture)
         src << "begin; (#{@bufstack} ||= []) << #{@bufvar}; #{@bufvar} = #{@bufval}; #{@bufstack}.last << #{@escapefunc if escape_capture}((" << code
         add_text(rspace) if rspace
       when '|'
