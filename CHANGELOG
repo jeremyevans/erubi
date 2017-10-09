@@ -1,4 +1,4 @@
-=== master
+=== 1.7.0 (2017-10-09)
 
 * Fix escaping in erubi/capture_end, the setting was previously inverted (jeremyevans) (#10)
 
