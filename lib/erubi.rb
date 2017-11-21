@@ -2,16 +2,10 @@
 
 module Erubi
   VERSION = '1.7.0'
-  RANGE_ALL = 0..-1
 
   if RUBY_VERSION >= '1.9'
-    RANGE_FIRST = 0
-    RANGE_LAST = -1
     TEXT_END = RUBY_VERSION >= '2.1' ? "'.freeze;" : "';"
   else
-    # :nocov:
-    RANGE_FIRST = 0..0
-    RANGE_LAST = -1..-1
     TEXT_END = "';"
   end
 
@@ -96,28 +90,27 @@ module Erubi
         len  = match.begin(0) - pos
         text = input[pos, len]
         pos  = match.end(0)
-        ch   = indicator ? indicator[RANGE_FIRST] : nil
+        ch   = indicator ? indicator[0] : nil
 
         lspace = nil
 
         unless ch == '='
           if text.empty?
             lspace = "" if is_bol
-          elsif text[RANGE_LAST] == "\n"
+          elsif text.end_with?("\n")
             lspace = ""
           else
             rindex = text.rindex("\n")
             if rindex
-              range = rindex+1..-1
-              s = text[range]
+              s = text[rindex+1, text.length]
               if s =~ /\A[ \t]*\z/
                 lspace = s
-                text[range] = ''
+                text[rindex+1, text.length] = ''
               end
             else
               if is_bol && text =~ /\A[ \t]*\z/
                 lspace = text.dup
-                text[RANGE_ALL] = ''
+                text = ''
               end
             end
           end
@@ -154,10 +147,10 @@ module Erubi
           handle(indicator, code, tailch, rspace, lspace)
         end
       end
-      rest = pos == 0 ? input : input[pos..-1]
+      rest = pos == 0 ? input : input[pos, input.size]
       add_text(rest)
 
-      src << "\n" unless src[RANGE_LAST] == "\n"
+      src << "\n" unless src.end_with?("\n")
       add_postamble(postamble)
       src << "; ensure\n  #{bufvar} = __original_outvar\nend\n" if properties[:ensure]
       src.freeze
@@ -174,7 +167,7 @@ module Erubi
     # Add ruby code to the template
     def add_code(code)
       @src << code
-      @src << ';' unless code[RANGE_LAST] == "\n"
+      @src << ';' unless code.end_with?("\n")
     end
 
     # Add the given ruby expression result to the template,
