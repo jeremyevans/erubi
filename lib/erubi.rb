@@ -123,7 +123,7 @@ module Erubi
           end
         end
 
-        is_bol = rspace ? true : false
+        is_bol = rspace
         add_text(text) if text && !text.empty?
         case ch
         when '='
