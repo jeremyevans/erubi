@@ -13,7 +13,6 @@ the same basic algorithm, with the following differences:
 * Does no monkey patching (Erubis adds a method to Kernel)
 * Uses an immutable design (all options passed to the constructor, which returns a frozen object)
 * Has simpler internals (1 file, <150 lines of code)
-* Has an open development model (Erubis doesn't have a public source control repository or bug tracker)
 * Is not dead (Erubis hasn't been updated since 2011)
 
 It is not designed with Erubis API compatibility in mind, though most Erubis
