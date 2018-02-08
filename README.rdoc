@@ -37,9 +37,8 @@ file:
   require 'erubi'
   eval(Erubi::Engine.new(File.read('filename.erb')).src)
 
-Most users are will probably use Erubi via Rails or Tilt.  Erubi is the default
-erb template handler in Tilt 2.0.6+ and will be the default template handler in
-Rails 5.1+.
+Most users will probably use Erubi via Rails or Tilt.  Erubi is the default
+erb template handler in Tilt 2.0.6+ and Rails 5.1+.
 
 == Capturing
 
