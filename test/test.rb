@@ -119,6 +119,67 @@ END2
 END3
   end
 
+  it "should strip only whitespace for <%, <%- and <%# tags" do
+    check_output(<<END1, <<END2, <<END3){}
+  <% 1 %>  
+a
+  <%- 2 %>  
+b
+  <%# 3 %>  
+c
+ /<% 1 %>  
+a
+/ <%- 2 %>  
+b
+//<%# 3 %>  
+c
+  <% 1 %> /
+a
+  <%- 2 %>/ 
+b
+  <%# 3 %>//
+c
+END1
+_buf = String.new;   1   
+ _buf << 'a
+';   2   
+ _buf << 'b
+';
+ _buf << 'c
+ /'; 1 ; _buf << '  
+'; _buf << 'a
+/ '; 2 ; _buf << '  
+'; _buf << 'b
+//';
+ _buf << '  
+'; _buf << 'c
+'; _buf << '  '; 1 ; _buf << ' /
+a
+'; _buf << '  '; 2 ; _buf << '/ 
+b
+'; _buf << '  ';; _buf << '//
+c
+';
+_buf.to_s
+END2
+a
+b
+c
+ /  
+a
+/   
+b
+//  
+c
+   /
+a
+  / 
+b
+  //
+c
+END3
+  end
+
   it "should handle ensure option" do
     list = ['&\'<>"2']
     @options[:ensure] = true

@@ -1,3 +1,7 @@
+=== master
+
+* Make whitespace handling for <%# %> tags more compatible with Erubis (jeremyevans) (#14)
+
 === 1.7.0 (2017-10-09)
 
 * Fix escaping in erubi/capture_end, the setting was previously inverted (jeremyevans) (#10)

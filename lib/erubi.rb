@@ -133,7 +133,7 @@ module Erubi
           add_text(rspace) if rspace
         when '#'
           n = code.count("\n") + (rspace ? 1 : 0)
-          if trim
+          if trim && lspace && rspace
             add_code("\n" * n)
           else
             add_text(lspace) if lspace
