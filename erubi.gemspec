@@ -5,7 +5,6 @@ Gem::Specification.new do |s|
   s.name = 'erubi'
   s.version = Erubi::VERSION
   s.platform = Gem::Platform::RUBY
-  s.has_rdoc = true
   s.extra_rdoc_files = ["README.rdoc", "CHANGELOG", "MIT-LICENSE"]
   s.rdoc_options += ["--quiet", "--line-numbers", "--inline-source", '--title', 'Erubi: Small ERB Implementation', '--main', 'README.rdoc']
   s.license = "MIT"
