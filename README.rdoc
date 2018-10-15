@@ -63,6 +63,35 @@ To use the capture_end support with tilt:
   require 'erubi/capture_end'
   Tilt.new("filename.erb", :engine_class=>Erubi::CaptureEndEngine).render
 
+When using the capture_end support, any methods (such as +form+ in the example
+above) should return the (potentially modified) buffer.  Since the buffer
+variable is a local variable and not an instance variable by default, you'll
+probably want to set the +:bufvar+ variable when using the capture_end
+support to an instance variable, and have any methods used access that
+instance variable.  Example:
+
+  def form
+    @_buf << "<form>"
+    yield
+    @_buf << "</form>"
+    @_buf
+  end
+
+  puts eval(Erubi::CaptureEndEngine.new(<<-END, :bufvar=>:@_buf).src)
+  before
+  <%|= form do %>
+  inside
+  <%| end %>
+  after
+  END
+
+  # Output:
+  # before
+  # <form>
+  # inside
+  # </form>
+  # after
+
 = Reporting Bugs
 
 The bug tracker is located at https://github.com/jeremyevans/erubi/issues
