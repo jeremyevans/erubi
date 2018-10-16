@@ -1,3 +1,7 @@
+=== master
+
+* Support :return_buffer option in capture_end for always returning the (potentially modified) buffer in <%|= tags (evanleck) (#15)
+
 === 1.7.1 (2018-03-05)
 
 * Make whitespace handling for <%# %> tags more compatible with Erubis (jeremyevans) (#14)

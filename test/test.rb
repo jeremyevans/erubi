@@ -664,46 +664,51 @@ END3
     proc{Erubi::CaptureEndEngine.new('<%] %>', :regexp =>/<%(={1,2}|\]|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m)}.must_raise ArgumentError
   end
 
-  it "should return the last argument of the block without the :return_buffer option" do
+  it "should respect the :return_buffer option for making templates return the (potentially modified) buffer" do
     @options[:engine] = ::Erubi::CaptureEndEngine
+    @options[:bufvar] = '@a'
 
-    list = ['burgers', 'salads']
+    def self.bar
+      @a << "a"
+      yield 'burgers'
+      yield 'salads'
+      @a << 'b'
+      @a.upcase!
+      nil
+    end
+
     check_output(<<END1, <<END2, <<END3){}
-<%|= list.each do |item| %>
+<%|= bar do |item| %>
 Let's eat <%= item %>!
 <%| end %>
 END1
-_buf = String.new;begin; (__erubi_stack ||= []) << _buf; _buf = String.new; __erubi_stack.last << (( list.each do |item|  _buf << '
-'; _buf << 'Let\\'s eat '; _buf << ( item ).to_s; _buf << '!
-'; end )).to_s; ensure; _buf = __erubi_stack.pop; end; _buf << '
+@a = String.new;begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << (( bar do |item|  @a << '
+'; @a << 'Let\\'s eat '; @a << ( item ).to_s; @a << '!
+'; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 ';
-_buf.to_s
+@a.to_s
 END2
-#{ list.to_s }
-END3
-  end
 
-  it "should return the buffer contents with the :return_buffer option" do
-    @options[:engine] = ::Erubi::CaptureEndEngine
+END3
+
     @options[:return_buffer] = true
 
-    list = ['burgers', 'salads']
     check_output(<<END1, <<END2, <<END3) {}
-<%|= list.each do |item| %>
+<%|= bar do |item| %>
 Let's eat <%= item %>!
 <%| end %>
 END1
-_buf = String.new;begin; (__erubi_stack ||= []) << _buf; _buf = String.new; __erubi_stack.last << (( list.each do |item|  _buf << '
-'; _buf << 'Let\\'s eat '; _buf << ( item ).to_s; _buf << '!
-'; end ; _buf; )).to_s; ensure; _buf = __erubi_stack.pop; end; _buf << '
+@a = String.new;begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << (( bar do |item|  @a << '
+'; @a << 'Let\\'s eat '; @a << ( item ).to_s; @a << '!
+'; end ; @a; )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 ';
-_buf.to_s
+@a.to_s
 END2
+A
+LET'S EAT BURGERS!
 
-Let's eat burgers!
-
-Let's eat salads!
-
+LET'S EAT SALADS!
+B
 END3
   end
 end
