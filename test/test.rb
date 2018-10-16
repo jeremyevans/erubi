@@ -679,7 +679,7 @@ _buf = String.new;begin; (__erubi_stack ||= []) << _buf; _buf = String.new; __er
 ';
 _buf.to_s
 END2
-["burgers", "salads"]
+#{ list.to_s }
 END3
   end
 
