@@ -23,6 +23,8 @@ end
 
 require 'erubi'
 require 'erubi/capture_end'
+
+ENV['MT_NO_PLUGINS'] = '1' # Work around stupid autoloading of plugins
 require 'minitest/spec'
 require 'minitest/autorun'
 
