@@ -663,4 +663,47 @@ END3
     proc{Erubi::Engine.new('<%] %>', :regexp =>/<%(={1,2}|\]|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m)}.must_raise ArgumentError
     proc{Erubi::CaptureEndEngine.new('<%] %>', :regexp =>/<%(={1,2}|\]|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m)}.must_raise ArgumentError
   end
+
+  it "should return the last argument of the block without the :return_buffer option" do
+    @options[:engine] = ::Erubi::CaptureEndEngine
+
+    list = ['burgers', 'salads']
+    check_output(<<END1, <<END2, <<END3){}
+<%|= list.each do |item| %>
+Let's eat <%= item %>!
+<%| end %>
+END1
+_buf = String.new;begin; (__erubi_stack ||= []) << _buf; _buf = String.new; __erubi_stack.last << (( list.each do |item|  _buf << '
+'; _buf << 'Let\\'s eat '; _buf << ( item ).to_s; _buf << '!
+'; end )).to_s; ensure; _buf = __erubi_stack.pop; end; _buf << '
+';
+_buf.to_s
+END2
+["burgers", "salads"]
+END3
+  end
+
+  it "should return the buffer contents with the :return_buffer option" do
+    @options[:engine] = ::Erubi::CaptureEndEngine
+    @options[:return_buffer] = true
+
+    list = ['burgers', 'salads']
+    check_output(<<END1, <<END2, <<END3) {}
+<%|= list.each do |item| %>
+Let's eat <%= item %>!
+<%| end %>
+END1
+_buf = String.new;begin; (__erubi_stack ||= []) << _buf; _buf = String.new; __erubi_stack.last << (( list.each do |item|  _buf << '
+'; _buf << 'Let\\'s eat '; _buf << ( item ).to_s; _buf << '!
+'; end ; _buf; )).to_s; ensure; _buf = __erubi_stack.pop; end; _buf << '
+';
+_buf.to_s
+END2
+
+Let's eat burgers!
+
+Let's eat salads!
+
+END3
+  end
 end
