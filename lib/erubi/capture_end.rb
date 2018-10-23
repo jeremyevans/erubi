@@ -10,8 +10,12 @@ module Erubi
     # additional options:
     # :escape_capture :: Whether to make <%|= escape by default, and <%|== not escape by default,
     #                    defaults to the same value as :escape.
-    # :yield_returns_buffer :: Whether to return the buffer itself or the last expression of the block,
-    #                   defaults to false.
+    # :yield_returns_buffer :: Whether to have <%| tags insert the buffer as an expression, so that
+    #                          <%| end %> tags will have the buffer be the last expression inside
+    #                          the block, and therefore have the buffer be returned by the yield
+    #                          expression.  Normally the buffer will be returned anyway, but there
+    #                          are cases where the last expression will not be the buffer,
+    #                          and therefore a different object will be returned.
     def initialize(input, properties={})
       properties = Hash[properties]
       escape = properties.fetch(:escape){properties.fetch(:escape_html, false)}
