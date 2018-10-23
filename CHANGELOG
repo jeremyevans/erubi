@@ -1,6 +1,6 @@
 === master
 
-* Support :return_buffer option in capture_end for always returning the (potentially modified) buffer in <%|= tags (evanleck) (#15)
+* Support :yield_returns_buffer option in capture_end for always returning the (potentially modified) buffer in <%|= tags (evanleck) (#15)
 
 === 1.7.1 (2018-03-05)
 

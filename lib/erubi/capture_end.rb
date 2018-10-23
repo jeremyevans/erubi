@@ -10,13 +10,13 @@ module Erubi
     # additional options:
     # :escape_capture :: Whether to make <%|= escape by default, and <%|== not escape by default,
     #                    defaults to the same value as :escape.
-    # :return_buffer :: Whether to return the buffer itself or the last expression of the block,
+    # :yield_returns_buffer :: Whether to return the buffer itself or the last expression of the block,
     #                   defaults to false.
     def initialize(input, properties={})
       properties = Hash[properties]
       escape = properties.fetch(:escape){properties.fetch(:escape_html, false)}
       @escape_capture = properties.fetch(:escape_capture, escape)
-      @return_buffer = properties.fetch(:return_buffer, false)
+      @yield_returns_buffer = properties.fetch(:yield_returns_buffer, false)
       @bufval = properties[:bufval] ||= 'String.new'
       @bufstack = '__erubi_stack'
       properties[:regexp] ||= /<%(\|?={1,2}|-|\#|%|\|)?(.*?)([-=])?%>([ \t]*\r?\n)?/m
@@ -37,7 +37,7 @@ module Erubi
       when '|'
         rspace = nil if tailch && !tailch.empty?
         add_text(lspace) if lspace
-        result = @return_buffer ? " #{@bufvar}; " : ""
+        result = @yield_returns_buffer ? " #{@bufvar}; " : ""
         src << result << code << ")).to_s; ensure; #{@bufvar} = #{@bufstack}.pop; end;"
         add_text(rspace) if rspace
       else
