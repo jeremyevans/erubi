@@ -671,22 +671,25 @@ END3
     @options[:bufvar] = '@a'
 
     def self.bar
-      @a << "a"
+      a = String.new
+      a << "a"
       yield 'burgers'
-      yield 'salads'
-      @a << 'b'
-      @a.upcase!
-      nil
+      case b = (yield 'salads')
+      when String
+        a << b
+        a << 'b'
+        a.upcase
+      end
     end
 
     check_output(<<END1, <<END2, <<END3){}
 <%|= bar do |item| %>
 Let's eat <%= item %>!
-<%| end %>
+<% nil %><%| end %>
 END1
 @a = String.new;begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << (( bar do |item|  @a << '
 '; @a << 'Let\\'s eat '; @a << ( item ).to_s; @a << '!
-'; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
+'; nil ; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 ';
 @a.to_s
 END2
@@ -698,11 +701,11 @@ END3
     check_output(<<END1, <<END2, <<END3) {}
 <%|= bar do |item| %>
 Let's eat <%= item %>!
-<%| end %>
+<% nil %><%| end %>
 END1
 @a = String.new;begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << (( bar do |item|  @a << '
 '; @a << 'Let\\'s eat '; @a << ( item ).to_s; @a << '!
-'; end ; @a; )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
+'; nil ; @a;  end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 ';
 @a.to_s
 END2
