@@ -37,8 +37,8 @@ module Erubi
       when '|'
         rspace = nil if tailch && !tailch.empty?
         add_text(lspace) if lspace
-        result = @return_buffer ? "; #{@bufvar}; " : ""
-        src << code << result << ")).to_s; ensure; #{@bufvar} = #{@bufstack}.pop; end;"
+        result = @return_buffer ? " #{@bufvar}; " : ""
+        src << result << code << ")).to_s; ensure; #{@bufvar} = #{@bufstack}.pop; end;"
         add_text(rspace) if rspace
       else
         super

@@ -713,4 +713,59 @@ LET'S EAT SALADS!
 B
 END3
   end
+
+  it "should respect the :return_buffer option for making templates return the (potentially modified) buffer as the result of the block" do
+    @options[:engine] = ::Erubi::CaptureEndEngine
+    @options[:return_buffer] = true
+
+    def self.bar(foo = nil)
+      if foo.nil?
+        yield
+      else
+        foo
+      end
+    end
+
+    check_output(<<END1, <<END2, <<END3) {}
+<%|= bar do %>
+Let's eat the tacos!
+<%| end %>
+
+Delicious!
+END1
+_buf = String.new;begin; (__erubi_stack ||= []) << _buf; _buf = String.new; __erubi_stack.last << (( bar do  _buf << '
+'; _buf << 'Let\\'s eat the tacos!
+'; _buf;  end )).to_s; ensure; _buf = __erubi_stack.pop; end; _buf << '
+'; _buf << '
+Delicious!
+';
+_buf.to_s
+END2
+
+Let's eat the tacos!
+
+
+Delicious!
+END3
+
+    check_output(<<END1, <<END2, <<END3) {}
+<%|= bar("Don't eat the burgers!") do %>
+Let's eat burgers!
+<%| end %>
+
+Delicious!
+END1
+_buf = String.new;begin; (__erubi_stack ||= []) << _buf; _buf = String.new; __erubi_stack.last << (( bar(\"Don't eat the burgers!\") do  _buf << '
+'; _buf << 'Let\\'s eat burgers!
+'; _buf;  end )).to_s; ensure; _buf = __erubi_stack.pop; end; _buf << '
+'; _buf << '
+Delicious!
+';
+_buf.to_s
+END2
+Don't eat the burgers!
+
+Delicious!
+END3
+  end
 end
