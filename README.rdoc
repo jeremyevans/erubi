@@ -92,7 +92,7 @@ instance variable.  Example:
   # </form>
   # after
 
-Alternatively, passing the option +:return_buffer => true+ will return the
+Alternatively, passing the option +:yield_returns_buffer => true+ will return the
 buffer captured by the block instead of the last expression in the block.
 
 = Reporting Bugs

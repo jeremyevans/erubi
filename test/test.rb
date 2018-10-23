@@ -666,7 +666,7 @@ END3
     proc{Erubi::CaptureEndEngine.new('<%] %>', :regexp =>/<%(={1,2}|\]|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m)}.must_raise ArgumentError
   end
 
-  it "should respect the :return_buffer option for making templates return the (potentially modified) buffer" do
+  it "should respect the :yield_returns_buffer option for making templates return the (potentially modified) buffer" do
     @options[:engine] = ::Erubi::CaptureEndEngine
     @options[:bufvar] = '@a'
 
@@ -696,7 +696,7 @@ END2
 
 END3
 
-    @options[:return_buffer] = true
+    @options[:yield_returns_buffer] = true
 
     check_output(<<END1, <<END2, <<END3) {}
 <%|= bar do |item| %>
@@ -717,9 +717,9 @@ B
 END3
   end
 
-  it "should respect the :return_buffer option for making templates return the (potentially modified) buffer as the result of the block" do
+  it "should respect the :yield_returns_buffer option for making templates return the (potentially modified) buffer as the result of the block" do
     @options[:engine] = ::Erubi::CaptureEndEngine
-    @options[:return_buffer] = true
+    @options[:yield_returns_buffer] = true
 
     def self.bar(foo = nil)
       if foo.nil?
