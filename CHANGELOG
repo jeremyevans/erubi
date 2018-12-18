@@ -1,4 +1,4 @@
-=== master
+=== 1.8.0 (2018-12-18)
 
 * Support :yield_returns_buffer option in capture_end for always returning the (potentially modified) buffer in <%|= tags (evanleck) (#15)
 
