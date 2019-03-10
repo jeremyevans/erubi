@@ -15,8 +15,10 @@ rvm:
   - jruby-9.1.12.0
   - jruby-head
   - ruby-head
+  - truffleruby
 matrix:
   allow_failures:
     - rvm: jruby-head
     - rvm: ruby-head
+    - rvm: truffleruby
 gemfile: .travis.gemfile
