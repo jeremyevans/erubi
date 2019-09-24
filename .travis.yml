@@ -1,7 +1,5 @@
 language: ruby
 rvm:
-  - 1.8.7
-  - 1.9.2
   - 1.9.3
   - 2.0.0
   - 2.1
@@ -18,8 +16,14 @@ rvm:
   - ruby-head
   - truffleruby
 matrix:
+  include:
+    - rvm: 1.8.7
+      dist: trusty
+    - rvm: 1.9.2
+      dist: trusty
   allow_failures:
     - rvm: jruby-head
+    - rvm: jruby-9.0.5.0
     - rvm: ruby-head
     - rvm: truffleruby
 gemfile: .travis.gemfile
