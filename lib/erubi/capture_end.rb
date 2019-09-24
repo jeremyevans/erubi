@@ -21,7 +21,7 @@ module Erubi
       escape = properties.fetch(:escape){properties.fetch(:escape_html, false)}
       @escape_capture = properties.fetch(:escape_capture, escape)
       @yield_returns_buffer = properties.fetch(:yield_returns_buffer, false)
-      @bufval = properties[:bufval] ||= 'String.new'
+      @bufval = properties[:bufval] ||= '::String.new'
       @bufstack = '__erubi_stack'
       properties[:regexp] ||= /<%(\|?={1,2}|-|\#|%|\|)?(.*?)([-=])?%>([ \t]*\r?\n)?/m
       super

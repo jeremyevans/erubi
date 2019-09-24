@@ -51,9 +51,9 @@ module Erubi
 
     # Initialize a new Erubi::Engine.  Options:
     # :bufval :: The value to use for the buffer variable, as a string.
-    # :bufvar :: The variable name to use for the buffer variable, as a string.
+    # :bufvar :: The variable name to use for the buffer variable, as a string (default '::String.new')
     # :ensure :: Wrap the template in a begin/ensure block restoring the previous value of bufvar.
-    # :escapefunc :: The function to use for escaping, as a string (default: ::Erubi.h).
+    # :escapefunc :: The function to use for escaping, as a string (default: '::Erubi.h').
     # :escape :: Whether to make <%= escape by default, and <%== not escape by default.
     # :escape_html :: Same as :escape, with lower priority.
     # :filename :: The filename for the template.
@@ -69,7 +69,7 @@ module Erubi
       trim       = properties[:trim] != false
       @filename  = properties[:filename]
       @bufvar = bufvar = properties[:bufvar] || properties[:outvar] || "_buf"
-      bufval = properties[:bufval] || 'String.new'
+      bufval = properties[:bufval] || '::String.new'
       regexp = properties[:regexp] || /<%(={1,2}|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m
       preamble   = properties[:preamble] || "#{bufvar} = #{bufval};"
       postamble  = properties[:postamble] || "#{bufvar}.to_s\n"

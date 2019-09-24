@@ -94,7 +94,7 @@ describe Erubi::Engine do
 </table>
 <%== i+1 %>
 END1
-_buf = String.new; _buf << '<table>
+_buf = ::String.new; _buf << '<table>
  <tbody>
 ';   i = 0
      list.each_with_index do |item, i| 
@@ -142,7 +142,7 @@ b
   <%# 3 %>//
 c
 END1
-_buf = String.new;   1   
+_buf = ::String.new;   1   
  _buf << 'a
 ';   2   
  _buf << 'b
@@ -201,7 +201,7 @@ END3
 </table>
 <%== i+1 %>
 END1
-begin; __original_outvar = @a if defined?(@a); @a = String.new; @a << '<table>
+begin; __original_outvar = @a if defined?(@a); @a = ::String.new; @a << '<table>
  <tbody>
 ';   i = 0
      list.each_with_index do |item, i| 
@@ -265,9 +265,9 @@ END3
  </tbody>
 </table>
 END1
-#{'__erubi = ::Erubi;' unless escape}@a = String.new; @a << '<table>
+#{'__erubi = ::Erubi;' unless escape}@a = ::String.new; @a << '<table>
  <tbody>
-'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << (( bar do  @a << '
+'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = ::String.new; __erubi_stack.last << (( bar do  @a << '
 '; @a << '   <b>'; @a << #{!escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</b>
 '; @a << ' '; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 '; @a << ' </tbody>
@@ -301,9 +301,9 @@ END3
  </tbody>
 </table>
 END1
-#{'__erubi = ::Erubi;' if escape}@a = String.new; @a << '<table>
+#{'__erubi = ::Erubi;' if escape}@a = ::String.new; @a << '<table>
  <tbody>
-'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << #{escape ? '__erubi' : '::Erubi'}.h(( bar do  @a << '
+'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = ::String.new; __erubi_stack.last << #{escape ? '__erubi' : '::Erubi'}.h(( bar do  @a << '
 '; @a << '   <b>'; @a << #{escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</b>
 '; @a << ' '; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 '; @a << ' </tbody>
@@ -335,9 +335,9 @@ END3
  </tbody>
 </table>
 END1
-#{'__erubi = ::Erubi;' if escape}@a = String.new; @a << '<table>
+#{'__erubi = ::Erubi;' if escape}@a = ::String.new; @a << '<table>
  <tbody>
-'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << #{escape ? '__erubi' : '::Erubi'}.h(( quux do |i|  @a << '
+'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = ::String.new; __erubi_stack.last << #{escape ? '__erubi' : '::Erubi'}.h(( quux do |i|  @a << '
 '; @a << '   <b>'; @a << #{escape ? '__erubi' : '::Erubi'}.h(( "\#{i}&" )); @a << '</b>
 '; @a << ' '; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 '; @a << ' </tbody>
@@ -374,11 +374,11 @@ END3
  </tbody>
 </table>
 END1
-#{'__erubi = ::Erubi;' if escape}@a = String.new; @a << '<table>
+#{'__erubi = ::Erubi;' if escape}@a = ::String.new; @a << '<table>
  <tbody>
-'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << #{escape ? '__erubi' : '::Erubi'}.h(( bar do  @a << '
+'; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = ::String.new; __erubi_stack.last << #{escape ? '__erubi' : '::Erubi'}.h(( bar do  @a << '
 '; @a << '   <b>'; @a << #{escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</b>
-'; @a << '   ';begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << #{escape ? '__erubi' : '::Erubi'}.h(( baz do  @a << 'e'; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
+'; @a << '   ';begin; (__erubi_stack ||= []) << @a; @a = ::String.new; __erubi_stack.last << #{escape ? '__erubi' : '::Erubi'}.h(( baz do  @a << 'e'; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 '; @a << ' '; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 '; @a << ' </tbody>
 </table>
@@ -414,7 +414,7 @@ END3
 </table>
 END1
 # frozen_string_literal: true
-@_out_buf = String.new; @_out_buf << '<table>
+@_out_buf = ::String.new; @_out_buf << '<table>
 ';   for item in @items 
  @_out_buf << '  <tr>
     <td>'; @_out_buf << ( i+1 ).to_s; @_out_buf << '</td>
@@ -448,7 +448,7 @@ END3
   <%% end %>
 </table>
 END1
-_buf = String.new; _buf << '<table>
+_buf = ::String.new; _buf << '<table>
 '; _buf << '<% for item in @items %>
 '; _buf << '  <tr>
     <td>';; _buf << '</td>
@@ -488,7 +488,7 @@ END3
   <% i %>
 </table>
 END1
-_buf = String.new; _buf << '<table>
+_buf = ::String.new; _buf << '<table>
 '; _buf << '  '; for item in @items ; _buf << '
 '; _buf << '  <tr>
     <td>';
@@ -537,7 +537,7 @@ END3
 </table>
 <%== i+1 %>
 END1
-_buf = String.new; _buf << '<table>
+_buf = ::String.new; _buf << '<table>
  <tbody>
 ';   i = 0
      list.each_with_index do |item, i| 
@@ -581,7 +581,7 @@ END3
  </tbody>
 </table>
 END1
-__erubi = ::Erubi;_buf = String.new; _buf << '<table>
+__erubi = ::Erubi;_buf = ::String.new; _buf << '<table>
  <tbody>
 ';   i = 0
      list.each_with_index do |item, i| 
@@ -653,6 +653,12 @@ END3
     Erubi::Engine.new('', :outvar=>'foo').bufvar.must_equal 'foo'
   end
 
+  it "should work with BasicObject methods" do
+    c = Class.new(BasicObject)
+    c.class_eval("def a; #{Erubi::Engine.new('2').src} end")
+    c.new.a.must_equal '2'
+  end if defined?(BasicObject)
+
   it "should return frozen object" do
     Erubi::Engine.new('').frozen?.must_equal true
   end
@@ -687,7 +693,7 @@ END3
 Let's eat <%= item %>!
 <% nil %><%| end %>
 END1
-@a = String.new;begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << (( bar do |item|  @a << '
+@a = ::String.new;begin; (__erubi_stack ||= []) << @a; @a = ::String.new; __erubi_stack.last << (( bar do |item|  @a << '
 '; @a << 'Let\\'s eat '; @a << ( item ).to_s; @a << '!
 '; nil ; end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 ';
@@ -703,7 +709,7 @@ END3
 Let's eat <%= item %>!
 <% nil %><%| end %>
 END1
-@a = String.new;begin; (__erubi_stack ||= []) << @a; @a = String.new; __erubi_stack.last << (( bar do |item|  @a << '
+@a = ::String.new;begin; (__erubi_stack ||= []) << @a; @a = ::String.new; __erubi_stack.last << (( bar do |item|  @a << '
 '; @a << 'Let\\'s eat '; @a << ( item ).to_s; @a << '!
 '; nil ; @a;  end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 ';
@@ -736,7 +742,7 @@ Let's eat the tacos!
 
 Delicious!
 END1
-_buf = String.new;begin; (__erubi_stack ||= []) << _buf; _buf = String.new; __erubi_stack.last << (( bar do  _buf << '
+_buf = ::String.new;begin; (__erubi_stack ||= []) << _buf; _buf = ::String.new; __erubi_stack.last << (( bar do  _buf << '
 '; _buf << 'Let\\'s eat the tacos!
 '; _buf;  end )).to_s; ensure; _buf = __erubi_stack.pop; end; _buf << '
 '; _buf << '
@@ -758,7 +764,7 @@ Let's eat burgers!
 
 Delicious!
 END1
-_buf = String.new;begin; (__erubi_stack ||= []) << _buf; _buf = String.new; __erubi_stack.last << (( bar(\"Don't eat the burgers!\") do  _buf << '
+_buf = ::String.new;begin; (__erubi_stack ||= []) << _buf; _buf = ::String.new; __erubi_stack.last << (( bar(\"Don't eat the burgers!\") do  _buf << '
 '; _buf << 'Let\\'s eat burgers!
 '; _buf;  end )).to_s; ensure; _buf = __erubi_stack.pop; end; _buf << '
 '; _buf << '
