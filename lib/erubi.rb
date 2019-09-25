@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Erubi
-  VERSION = '1.8.0'
+  VERSION = '1.9.0'
   RANGE_ALL = 0..-1
 
   if RUBY_VERSION >= '1.9'
