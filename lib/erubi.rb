@@ -50,8 +50,8 @@ module Erubi
     attr_reader :bufvar
 
     # Initialize a new Erubi::Engine.  Options:
-    # :bufval :: The value to use for the buffer variable, as a string.
-    # :bufvar :: The variable name to use for the buffer variable, as a string (default '::String.new')
+    # :bufval :: The value to use for the buffer variable, as a string (default '::String.new').
+    # :bufvar :: The variable name to use for the buffer variable, as a string.
     # :ensure :: Wrap the template in a begin/ensure block restoring the previous value of bufvar.
     # :escapefunc :: The function to use for escaping, as a string (default: '::Erubi.h').
     # :escape :: Whether to make <%= escape by default, and <%== not escape by default.
