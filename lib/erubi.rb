@@ -15,6 +15,8 @@ module Erubi
     TEXT_END = "';"
   end
 
+  MATCH_METHOD = RUBY_VERSION >= '2.4' ? :match? : :match
+
   begin
     require 'cgi/escape'
     unless CGI.respond_to?(:escapeHTML) # work around for JRuby 9.1
@@ -110,35 +112,35 @@ module Erubi
             if rindex
               range = rindex+1..-1
               s = text[range]
-              if s =~ /\A[ \t]*\z/
+              if /\A[ \t]*\z/.send(MATCH_METHOD, s)
                 lspace = s
                 text[range] = ''
               end
             else
-              if is_bol && text =~ /\A[ \t]*\z/
-                lspace = text.dup
-                text[RANGE_ALL] = ''
+              if is_bol && /\A[ \t]*\z/.send(MATCH_METHOD, text)
+                lspace = text
+                text = ''
               end
             end
           end
         end
 
         is_bol = rspace
-        add_text(text) if text && !text.empty?
+        add_text(text)
         case ch
         when '='
           rspace = nil if tailch && !tailch.empty?
-          add_text(lspace) if lspace
+          add_text(lspace)
           add_expression(indicator, code)
-          add_text(rspace) if rspace
+          add_text(rspace)
         when '#'
           n = code.count("\n") + (rspace ? 1 : 0)
           if trim && lspace && rspace
             add_code("\n" * n)
           else
-            add_text(lspace) if lspace
+            add_text(lspace)
             add_code("\n" * n)
-            add_text(rspace) if rspace
+            add_text(rspace)
           end
         when '%'
           add_text("#{lspace}#{prefix||='<%'}#{code}#{tailch}#{postfix||='%>'}#{rspace}")
@@ -146,9 +148,9 @@ module Erubi
           if trim && lspace && rspace
             add_code("#{lspace}#{code}#{rspace}")
           else
-            add_text(lspace) if lspace
+            add_text(lspace)
             add_code(code)
-            add_text(rspace) if rspace
+            add_text(rspace)
           end
         else
           handle(indicator, code, tailch, rspace, lspace)
@@ -166,19 +168,17 @@ module Erubi
 
     private
 
-    # Add raw text to the template
+    # Add raw text to the template.  Modifies argument if argument is mutable as a memory optimization.
     def add_text(text)
-      @src << " #{@bufvar} << '" << escape_text(text) << TEXT_END unless text.empty?
+      @src << " #{@bufvar} << '" << (/['\\]/.send(MATCH_METHOD, text) ? escape_text(text) : text) << TEXT_END if text && !text.empty?
     end
 
+    # Escape the given text if it needs escaping
     def escape_text(text)
-      if text.frozen?
-        text.gsub(/['\\]/, '\\\\\&')
-      else
-        text['\\'] = '\\\\' if text.include?('\\')
-        text["'"] = "\\'" if text.include?("'")
-        text
-      end
+      text = text.dup if text.frozen?
+      text['\\'] = '\\\\' if text.include?('\\')
+      text["'"] = "\\'" if text.include?("'")
+      text
     end
 
     # Add ruby code to the template

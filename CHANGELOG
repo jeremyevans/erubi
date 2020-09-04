@@ -1,3 +1,7 @@
+=== master
+
+* Reduce memory allocation during template parsing (fatkodima, jeremyevans) (#25)
+
 === 1.9.0 (2019-09-25)
 
 * Change default :bufvar from 'String.new' to '::String.new' to work with BasicObject (jeremyevans)
