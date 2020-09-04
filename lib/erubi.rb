@@ -168,7 +168,17 @@ module Erubi
 
     # Add raw text to the template
     def add_text(text)
-      @src << " #{@bufvar} << '" << text.gsub(/['\\]/, '\\\\\&') << TEXT_END unless text.empty?
+      @src << " #{@bufvar} << '" << escape_text(text) << TEXT_END unless text.empty?
+    end
+
+    def escape_text(text)
+      if text.frozen?
+        text.gsub(/['\\]/, '\\\\\&')
+      else
+        text['\\'] = '\\\\' if text.include?('\\')
+        text["'"] = "\\'" if text.include?("'")
+        text
+      end
     end
 
     # Add ruby code to the template
