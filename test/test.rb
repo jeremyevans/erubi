@@ -470,7 +470,7 @@ END2
 END3
   end
 
-  it "should handle <%% with a differnt literal prefix/postfix" do
+  it "should handle <%% with a different literal prefix/postfix" do
     @options[:literal_prefix] = "{%"
     @options[:literal_postfix] = "%}"
     @items = [2]
