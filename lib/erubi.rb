@@ -147,7 +147,7 @@ module Erubi
             add_text(rspace)
           end
         when '%'
-          add_text("#{lspace}#{prefix||=literal_prefix}#{code}#{tailch}#{postfix||=literal_postfix}#{rspace}")
+          add_text("#{lspace}#{literal_prefix}#{code}#{tailch}#{literal_postfix}#{rspace}")
         when nil, '-'
           if trim && lspace && rspace
             add_code("#{lspace}#{code}#{rspace}")
