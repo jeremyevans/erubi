@@ -60,6 +60,8 @@ module Erubi
     # :escape_html :: Same as :escape, with lower priority.
     # :filename :: The filename for the template.
     # :freeze :: Whether to enable frozen string literals in the resulting source code.
+    # :literal_prefix :: What to output when the tag delimiters are escaped (<%%). Default <%
+    # :literal_postfix :: What to output when the tag delimiters are escaped. Default %>
     # :outvar :: Same as bufvar, with lower priority.
     # :postamble :: The postamble for the template, by default returns the resulting source code.
     # :preamble :: The preamble for the template, by default initializes up the buffer variable.
@@ -73,6 +75,8 @@ module Erubi
       @bufvar = bufvar = properties[:bufvar] || properties[:outvar] || "_buf"
       bufval = properties[:bufval] || '::String.new'
       regexp = properties[:regexp] || /<%(={1,2}|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m
+      literal_prefix = properties[:literal_prefix] || '<%'
+      literal_postfix = properties[:literal_postfix] || '%>'
       preamble   = properties[:preamble] || "#{bufvar} = #{bufval};"
       postamble  = properties[:postamble] || "#{bufvar}.to_s\n"
 
@@ -143,7 +147,7 @@ module Erubi
             add_text(rspace)
           end
         when '%'
-          add_text("#{lspace}#{prefix||='<%'}#{code}#{tailch}#{postfix||='%>'}#{rspace}")
+          add_text("#{lspace}#{literal_prefix}#{code}#{tailch}#{literal_postfix}#{rspace}")
         when nil, '-'
           if trim && lspace && rspace
             add_code("#{lspace}#{code}#{rspace}")

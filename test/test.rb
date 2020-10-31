@@ -470,6 +470,40 @@ END2
 END3
   end
 
+  it "should handle <%% with a different literal prefix/postfix" do
+    @options[:literal_prefix] = "{%"
+    @options[:literal_postfix] = "%}"
+    @items = [2]
+    i = 0
+    check_output(<<END1, <<END2, <<END3){}
+<table>
+  <%% for item in @items %>
+  <tr>
+  </tr>
+  <%% end %>
+  <%%= "literal" %>
+</table>
+END1
+_buf = ::String.new; _buf << '<table>
+'; _buf << '  {% for item in @items %}
+'; _buf << '  <tr>
+  </tr>
+'; _buf << '  {% end %}
+'; _buf << '  {%= "literal" %}
+'; _buf << '</table>
+';
+_buf.to_s
+END2
+<table>
+  {% for item in @items %}
+  <tr>
+  </tr>
+  {% end %}
+  {%= "literal" %}
+</table>
+END3
+  end
+
   it "should handle :trim => false option" do
     @options[:trim] = false
     @items = [2]
