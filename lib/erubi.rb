@@ -52,22 +52,22 @@ module Erubi
     attr_reader :bufvar
 
     # Initialize a new Erubi::Engine.  Options:
-    # :bufval :: The value to use for the buffer variable, as a string (default '::String.new').
-    # :bufvar :: The variable name to use for the buffer variable, as a string.
-    # :ensure :: Wrap the template in a begin/ensure block restoring the previous value of bufvar.
-    # :escapefunc :: The function to use for escaping, as a string (default: '::Erubi.h').
-    # :escape :: Whether to make <%= escape by default, and <%== not escape by default.
-    # :escape_html :: Same as :escape, with lower priority.
-    # :filename :: The filename for the template.
-    # :freeze :: Whether to enable frozen string literals in the resulting source code.
-    # :literal_prefix :: What to output when the tag delimiters are escaped (<%%). Default <%
-    # :literal_postfix :: What to output when the tag delimiters are escaped. Default %>
-    # :outvar :: Same as bufvar, with lower priority.
-    # :postamble :: The postamble for the template, by default returns the resulting source code.
-    # :preamble :: The preamble for the template, by default initializes up the buffer variable.
-    # :regexp :: The regexp to use for scanning.
-    # :src :: The initial value to use for the source code
-    # :trim :: Whether to trim leading and trailing whitespace, true by default.
+    # +:bufval+ :: The value to use for the buffer variable, as a string (default <tt>'::String.new'</tt>).
+    # +:bufvar+ :: The variable name to use for the buffer variable, as a string.
+    # +:ensure+ :: Wrap the template in a begin/ensure block restoring the previous value of bufvar.
+    # +:escapefunc+ :: The function to use for escaping, as a string (default: <tt>'::Erubi.h'</tt>).
+    # +:escape+ :: Whether to make <tt><%=</tt> escape by default, and <tt><%==</tt> not escape by default.
+    # +:escape_html+ :: Same as +:escape+, with lower priority.
+    # +:filename+ :: The filename for the template.
+    # +:freeze+ :: Whether to enable frozen string literals in the resulting source code.
+    # +:literal_prefix+ :: The prefix to output when using escaped tag delimiters (default <tt>'<%'</tt>).
+    # +:literal_postfix+ :: The postfix to output when using escaped tag delimiters (default <tt>'%>'</tt>).
+    # +:outvar+ :: Same as +:bufvar+, with lower priority.
+    # +:postamble+ :: The postamble for the template, by default returns the resulting source code.
+    # +:preamble+ :: The preamble for the template, by default initializes the buffer variable.
+    # +:regexp+ :: The regexp to use for scanning.
+    # +:src+ :: The initial value to use for the source code, an empty string by default.
+    # +:trim+ :: Whether to trim leading and trailing whitespace, true by default.
     def initialize(input, properties={})
       @escape = escape = properties.fetch(:escape){properties.fetch(:escape_html, false)}
       trim       = properties[:trim] != false

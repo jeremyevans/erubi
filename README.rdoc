@@ -5,9 +5,9 @@ the same basic algorithm, with the following differences:
 
 * Handles postfix conditionals when using escaping (e.g. <tt><%= foo if bar %></tt>)
 * Supports frozen_string_literal: true in templates via :freeze option
-* Works with ruby's --enable-frozen-string-literal option
+* Works with ruby's <tt>--enable-frozen-string-literal</tt> option
 * Automatically freezes strings for template text when ruby optimizes it (on ruby 2.1+)
-* Escapes ' (apostrophe) when escaping for better XSS protection 
+* Escapes <tt>'</tt> (apostrophe) when escaping for better XSS protection 
 * Has 6x faster escaping on ruby 2.3+ by using cgi/escape
 * Has 86% smaller memory footprint
 * Does no monkey patching (Erubis adds a method to Kernel)
@@ -92,7 +92,7 @@ instance variable.  Example:
   # </form>
   # after
 
-Alternatively, passing the option +:yield_returns_buffer => true+ will return the
+Alternatively, passing the option <tt>:yield_returns_buffer => true</tt> will return the
 buffer captured by the block instead of the last expression in the block.
 
 = Reporting Bugs

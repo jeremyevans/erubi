@@ -3,15 +3,15 @@
 require 'erubi'
 
 module Erubi
-  # An engine class that supports capturing blocks via the <%|= and <%|== tags,
-  # explicitly ending the captures using <%| end %> blocks.
+  # An engine class that supports capturing blocks via the <tt><%|=</tt> and <tt><%|==</tt> tags,
+  # explicitly ending the captures using <tt><%|</tt> end <tt>%></tt> blocks.
   class CaptureEndEngine < Engine
     # Initializes the engine.  Accepts the same arguments as ::Erubi::Engine, and these
     # additional options:
-    # :escape_capture :: Whether to make <%|= escape by default, and <%|== not escape by default,
+    # :escape_capture :: Whether to make <tt><%|=</tt> escape by default, and <tt><%|==</tt> not escape by default,
     #                    defaults to the same value as :escape.
-    # :yield_returns_buffer :: Whether to have <%| tags insert the buffer as an expression, so that
-    #                          <%| end %> tags will have the buffer be the last expression inside
+    # :yield_returns_buffer :: Whether to have <tt><%|</tt> tags insert the buffer as an expression, so that
+    #                          <tt><%| end %></tt> tags will have the buffer be the last expression inside
     #                          the block, and therefore have the buffer be returned by the yield
     #                          expression.  Normally the buffer will be returned anyway, but there
     #                          are cases where the last expression will not be the buffer,
