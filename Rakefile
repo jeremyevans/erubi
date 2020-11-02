@@ -60,9 +60,7 @@ end
   
 desc "Run specs with -w, some warnings filtered"
 task "spec_w" do
-  ENV['RUBYOPT'] ? (ENV['RUBYOPT'] += " -w") : (ENV['RUBYOPT'] = '-w')
-  rake = ENV['RAKE'] || "#{FileUtils::RUBY} -S rake"
-  sh %{#{rake} 2>&1 | egrep -v \": warning: instance variable @.* not initialized|: warning: method redefined; discarding old|: warning: previous definition of|: warning: statement not reached"}
+  sh "#{FileUtils::RUBY} test/test_w.rb"
 end
 
 ### Other
