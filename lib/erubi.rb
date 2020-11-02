@@ -13,24 +13,27 @@ module Erubi
     RANGE_FIRST = 0..0
     RANGE_LAST = -1..-1
     TEXT_END = "';"
+    # :nocov:
   end
 
   MATCH_METHOD = RUBY_VERSION >= '2.4' ? :match? : :match
 
   begin
     require 'cgi/escape'
+    # :nocov:
     unless CGI.respond_to?(:escapeHTML) # work around for JRuby 9.1
       CGI = Object.new
       CGI.extend(defined?(::CGI::Escape) ? ::CGI::Escape : ::CGI::Util)
     end
+    # :nocov:
+    # Escape characters with their HTML/XML equivalents.
     def self.h(value)
       CGI.escapeHTML(value.to_s)
     end
   rescue LoadError
+    # :nocov:
     ESCAPE_TABLE = {'&' => '&amp;'.freeze, '<' => '&lt;'.freeze, '>' => '&gt;'.freeze, '"' => '&quot;'.freeze, "'" => '&#39;'.freeze}.freeze
     if RUBY_VERSION >= '1.9'
-      # Escape the following characters with their HTML/XML
-      # equivalents.
       def self.h(value)
         value.to_s.gsub(/[&<>"']/, ESCAPE_TABLE)
       end
@@ -39,6 +42,7 @@ module Erubi
         value.to_s.gsub(/[&<>"']/){|s| ESCAPE_TABLE[s]}
       end
     end
+    # :nocov:
   end
 
   class Engine
