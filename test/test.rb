@@ -121,6 +121,49 @@ END2
 END3
   end
 
+  it "should escape all backslashes and apostrophes in text" do
+    list = ['&\'<>"2']
+    check_output(<<END1, <<END2, <<END3){}
+<table>
+ <tbody>' ' \\ \\
+  <% i = 0
+     list.each_with_index do |item, i| %>
+  <tr>
+   <td><%= i+1 %></td>
+   <td><%== item %></td>
+  </tr>
+ <% end %>
+ </tbody>
+</table>
+<%== i+1 %>
+END1
+_buf = ::String.new; _buf << '<table>
+ <tbody>\\' \\' \\\\ \\\\
+';   i = 0
+     list.each_with_index do |item, i| 
+ _buf << '  <tr>
+   <td>'; _buf << ( i+1 ).to_s; _buf << '</td>
+   <td>'; _buf << ::Erubi.h(( item )); _buf << '</td>
+  </tr>
+';  end 
+ _buf << ' </tbody>
+</table>
+'; _buf << ::Erubi.h(( i+1 )); _buf << '
+';
+_buf.to_s
+END2
+<table>
+ <tbody>' ' \\ \\
+  <tr>
+   <td>1</td>
+   <td>&amp;&#39;&lt;&gt;&quot;2</td>
+  </tr>
+ </tbody>
+</table>
+1
+END3
+  end
+
   it "should strip only whitespace for <%, <%- and <%# tags" do
     check_output(<<END1, <<END2, <<END3){}
   <% 1 %>  

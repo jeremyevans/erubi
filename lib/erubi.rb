@@ -179,12 +179,10 @@ module Erubi
     # Add raw text to the template.  Modifies argument if argument is mutable as a memory optimization.
     def add_text(text)
       if text && !text.empty?
-        include_slash = text.include?('\\')
-        include_apos = text.include?("'")
-        if include_slash || include_apos
-          text = text.dup if text.frozen?
-          text['\\'] = '\\\\' if include_slash
-          text["'"] = "\\'" if include_apos
+        if text.frozen?
+          text = text.gsub(/['\\]/, '\\\\\&')
+        else
+          text.gsub!(/['\\]/, '\\\\\&')
         end
         @src << " " << @bufvar << " << '" << text << TEXT_END
       end
