@@ -169,7 +169,7 @@ module Erubi
 
       src << "\n" unless src[RANGE_LAST] == "\n"
       add_postamble(postamble)
-      src << "; ensure\n  #{bufvar} = __original_outvar\nend\n" if properties[:ensure]
+      src << "; ensure\n  " << bufvar << " = __original_outvar\nend\n" if properties[:ensure]
       src.freeze
       freeze
     end
@@ -178,15 +178,16 @@ module Erubi
 
     # Add raw text to the template.  Modifies argument if argument is mutable as a memory optimization.
     def add_text(text)
-      @src << " #{@bufvar} << '" << (/['\\]/.send(MATCH_METHOD, text) ? escape_text(text) : text) << TEXT_END if text && !text.empty?
-    end
-
-    # Escape the given text if it needs escaping
-    def escape_text(text)
-      text = text.dup if text.frozen?
-      text['\\'] = '\\\\' if text.include?('\\')
-      text["'"] = "\\'" if text.include?("'")
-      text
+      if text && !text.empty?
+        include_slash = text.include?('\\')
+        include_apos = text.include?("'")
+        if include_slash || include_apos
+          text = text.dup if text.frozen?
+          text['\\'] = '\\\\' if include_slash
+          text["'"] = "\\'" if include_apos
+        end
+        @src << " " << @bufvar << " << '" << text << TEXT_END
+      end
     end
 
     # Add ruby code to the template
@@ -207,12 +208,12 @@ module Erubi
 
     # Add the result of Ruby expression to the template
     def add_expression_result(code)
-      @src << " #{@bufvar} << (" << code << ').to_s;'
+      @src << ' ' << @bufvar << ' << (' << code << ').to_s;'
     end
 
     # Add the escaped result of Ruby expression to the template
     def add_expression_result_escaped(code)
-      @src << " #{@bufvar} << #{@escapefunc}((" << code << '));'
+      @src << ' ' << @bufvar << ' << ' << @escapefunc << '((' << code << '));'
     end
 
     # Add the given postamble to the src.  Can be overridden in subclasses
