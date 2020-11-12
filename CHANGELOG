@@ -1,5 +1,7 @@
 === master
 
+* Do not ship tests in the gem, reducing gem size about 20% (jeremyevans)
+
 * Support :literal_prefix and :literal_postfix options for how to output literal tags (e.g. <%% code %>) (jaredcwhite) (#26, #27)
 
 * Reduce memory allocation during template parsing (fatkodima, jeremyevans) (#25)
