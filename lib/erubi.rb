@@ -137,7 +137,6 @@ module Erubi
         case ch
         when '='
           rspace = nil if tailch && !tailch.empty?
-          add_text(lspace) if lspace
           add_expression(indicator, code)
           add_text(rspace) if rspace
         when '#'
