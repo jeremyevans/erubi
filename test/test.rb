@@ -123,19 +123,22 @@ END3
 
   it "should escape all backslashes and apostrophes in text" do
     list = ['&\'<>"2']
-    check_output(<<END1, <<END2, <<END3){}
+    check_output(<<END1.chomp, <<END2, <<END3){}
 <table>
  <tbody>' ' \\ \\
   <% i = 0
      list.each_with_index do |item, i| %>
   <tr>
-   <td><%= i+1 %></td>
+   <td><%= i+1 -%>
+</td>
    <td><%== item %></td>
   </tr>
  <% end %>
  </tbody>
 </table>
 <%== i+1 %>
+<%
+%>
 END1
 _buf = ::String.new; _buf << '<table>
  <tbody>\\' \\' \\\\ \\\\
