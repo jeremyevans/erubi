@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Erubi
-  VERSION = '1.9.0'
+  VERSION = '1.10.0'
   RANGE_ALL = 0..-1
 
   # :nocov:

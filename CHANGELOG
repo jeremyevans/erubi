@@ -1,4 +1,4 @@
-=== master
+=== 1.10.0 (2020-11-13)
 
 * Improve template parsing, mostly by reducing allocations (jeremyevans)
 
