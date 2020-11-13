@@ -134,21 +134,21 @@ module Erubi
         end
 
         is_bol = rspace
-        add_text(text)
+        add_text(text) if text
         case ch
         when '='
           rspace = nil if tailch && !tailch.empty?
-          add_text(lspace)
+          add_text(lspace) if lspace
           add_expression(indicator, code)
-          add_text(rspace)
+          add_text(rspace) if rspace
         when '#'
           n = code.count("\n") + (rspace ? 1 : 0)
           if trim && lspace && rspace
             add_code("\n" * n)
           else
-            add_text(lspace)
+            add_text(lspace) if lspace
             add_code("\n" * n)
-            add_text(rspace)
+            add_text(rspace) if rspace
           end
         when '%'
           add_text("#{lspace}#{literal_prefix}#{code}#{tailch}#{literal_postfix}#{rspace}")
@@ -156,9 +156,9 @@ module Erubi
           if trim && lspace && rspace
             add_code("#{lspace}#{code}#{rspace}")
           else
-            add_text(lspace)
+            add_text(lspace) if lspace
             add_code(code)
-            add_text(rspace)
+            add_text(rspace) if rspace
           end
         else
           handle(indicator, code, tailch, rspace, lspace)
@@ -177,15 +177,16 @@ module Erubi
     private
 
     # Add raw text to the template.  Modifies argument if argument is mutable as a memory optimization.
+    # Must be called with a string, cannot be called with nil (Rails's subclass depends on it).
     def add_text(text)
-      if text && !text.empty?
-        if text.frozen?
-          text = text.gsub(/['\\]/, '\\\\\&')
-        else
-          text.gsub!(/['\\]/, '\\\\\&')
-        end
-        @src << " " << @bufvar << " << '" << text << TEXT_END
+      return if text.empty?
+
+      if text.frozen?
+        text = text.gsub(/['\\]/, '\\\\\&')
+      else
+        text.gsub!(/['\\]/, '\\\\\&')
       end
+      @src << " " << @bufvar << " << '" << text << TEXT_END
     end
 
     # Add ruby code to the template
