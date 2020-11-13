@@ -13,6 +13,8 @@ if ENV['COVERAGE']
 
   ENV.delete('COVERAGE')
   SimpleCov.instance_eval do
+    enable_coverage :branch
+
     start do
       add_filter "/test/"
       add_group('Missing'){|src| src.covered_percent < 100}
