@@ -139,6 +139,14 @@ module Erubi
           rspace = nil if tailch && !tailch.empty?
           add_expression(indicator, code)
           add_text(rspace) if rspace
+        when nil, '-'
+          if trim && lspace && rspace
+            add_code("#{lspace}#{code}#{rspace}")
+          else
+            add_text(lspace) if lspace
+            add_code(code)
+            add_text(rspace) if rspace
+          end
         when '#'
           n = code.count("\n") + (rspace ? 1 : 0)
           if trim && lspace && rspace
@@ -150,14 +158,6 @@ module Erubi
           end
         when '%'
           add_text("#{lspace}#{literal_prefix}#{code}#{tailch}#{literal_postfix}#{rspace}")
-        when nil, '-'
-          if trim && lspace && rspace
-            add_code("#{lspace}#{code}#{rspace}")
-          else
-            add_text(lspace) if lspace
-            add_code(code)
-            add_text(rspace) if rspace
-          end
         else
           handle(indicator, code, tailch, rspace, lspace)
         end
