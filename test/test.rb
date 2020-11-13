@@ -278,6 +278,14 @@ END3
     @a.must_equal 'bar'
   end
 
+  it "should handle trailing rspace with - modifier in <%|= and <%|" do
+    eval(::Erubi::CaptureEndEngine.new("<%|= '&' -%>\n<%| -%>\n").src).must_equal '&'
+  end
+
+  it "should handle lspace in <%|=" do
+    eval(::Erubi::CaptureEndEngine.new("<%|= %><%| %><%|= %><%| %>").src).must_equal ''
+  end
+
   it "should have <%|= with CaptureEndEngine not escape by default" do
     eval(::Erubi::CaptureEndEngine.new('<%|= "&" %><%| %>').src).must_equal '&'
     eval(::Erubi::CaptureEndEngine.new('<%|= "&" %><%| %>', :escape=>false).src).must_equal '&'
