@@ -133,7 +133,7 @@ module Erubi
         end
 
         is_bol = rspace
-        add_text(text) if text
+        add_text(text)
         case ch
         when '='
           rspace = nil if tailch && !tailch.empty?
