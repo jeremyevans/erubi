@@ -4,19 +4,18 @@ module Erubi
   VERSION = '1.9.0'
   RANGE_ALL = 0..-1
 
+  # :nocov:
   if RUBY_VERSION >= '1.9'
     RANGE_FIRST = 0
     RANGE_LAST = -1
-    TEXT_END = RUBY_VERSION >= '2.1' ? "'.freeze;" : "';"
   else
-    # :nocov:
     RANGE_FIRST = 0..0
     RANGE_LAST = -1..-1
-    TEXT_END = "';"
-    # :nocov:
   end
 
+  TEXT_END = RUBY_VERSION >= '2.1' ? "'.freeze;" : "';"
   MATCH_METHOD = RUBY_VERSION >= '2.4' ? :match? : :match
+  # :nocov:
 
   begin
     require 'cgi/escape'
