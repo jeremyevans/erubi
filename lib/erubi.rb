@@ -2,7 +2,6 @@
 
 module Erubi
   VERSION = '1.10.0'
-  RANGE_ALL = 0..-1
 
   # :nocov:
   if RUBY_VERSION >= '1.9'
