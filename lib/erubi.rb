@@ -45,7 +45,7 @@ module Erubi
 
   class Engine
     # The default regular expression used for scanning.
-    DEFAULT_REGEXP = /<%(={1,2}|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m
+    DEFAULT_REGEXP = /<%(={1,2}|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m.freeze
     
     # The frozen ruby source code generated from the template, which can be evaled.
     attr_reader :src
