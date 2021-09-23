@@ -44,6 +44,9 @@ module Erubi
   end
 
   class Engine
+    # The default regular expression used for scanning.
+    DEFAULT_REGEXP = /<%(={1,2}|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m
+    
     # The frozen ruby source code generated from the template, which can be evaled.
     attr_reader :src
 
@@ -76,7 +79,7 @@ module Erubi
       @filename  = properties[:filename]
       @bufvar = bufvar = properties[:bufvar] || properties[:outvar] || "_buf"
       bufval = properties[:bufval] || '::String.new'
-      regexp = properties[:regexp] || /<%(={1,2}|-|\#|%)?(.*?)([-=])?%>([ \t]*\r?\n)?/m
+      regexp = properties[:regexp] || DEFAULT_REGEXP
       literal_prefix = properties[:literal_prefix] || '<%'
       literal_postfix = properties[:literal_postfix] || '%>'
       preamble   = properties[:preamble] || "#{bufvar} = #{bufval};"
