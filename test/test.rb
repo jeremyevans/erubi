@@ -81,7 +81,7 @@ describe Erubi::Engine do
   end
 
   it "should handle no options" do
-    list = ['&\'<>"2']
+    list = list = ['&\'<>"2']
     check_output(<<END1, <<END2, <<END3){}
 <table>
  <tbody>
@@ -124,7 +124,7 @@ END3
   end
 
   it "should escape all backslashes and apostrophes in text" do
-    list = ['&\'<>"2']
+    list = list = ['&\'<>"2']
     check_output(<<END1.chomp, <<END2, <<END3){}
 <table>
  <tbody>' ' \\ \\
@@ -171,41 +171,41 @@ END3
 
   it "should strip only whitespace for <%, <%- and <%# tags" do
     check_output(<<END1, <<END2, <<END3){}
-  <% 1 %>  
+  <% a = 1 %>  
 a
-  <%- 2 %>  
+  <%- a = 2 %>  
 b
-  <%# 3 %>  
+  <%# a = 3 %>  
 c
- /<% 1 %>  
+ /<% a = 1 %>  
 a
-/ <%- 2 %>  
+/ <%- a = 2 %>  
 b
-//<%# 3 %>  
+//<%# a = 3 %>  
 c
-  <% 1 %> /
+  <% a = 1 %> /
 a
-  <%- 2 %>/ 
+  <%- a = 2 %>/ 
 b
-  <%# 3 %>//
+  <%# a = 3 %>//
 c
 END1
-_buf = ::String.new;   1   
+_buf = ::String.new;   a = 1   
  _buf << 'a
-';   2   
+';   a = 2   
  _buf << 'b
 ';
  _buf << 'c
- /'; 1 ; _buf << '  
+ /'; a = 1 ; _buf << '  
 '; _buf << 'a
-/ '; 2 ; _buf << '  
+/ '; a = 2 ; _buf << '  
 '; _buf << 'b
 //';
  _buf << '  
 '; _buf << 'c
-'; _buf << '  '; 1 ; _buf << ' /
+'; _buf << '  '; a = 1 ; _buf << ' /
 a
-'; _buf << '  '; 2 ; _buf << '/ 
+'; _buf << '  '; a = 2 ; _buf << '/ 
 b
 '; _buf << '  ';; _buf << '//
 c
@@ -231,7 +231,7 @@ END3
   end
 
   it "should handle ensure option" do
-    list = ['&\'<>"2']
+    list = list = ['&\'<>"2']
     @options[:ensure] = true
     @options[:bufvar] = '@a'
     @a = 'bar'
@@ -458,7 +458,7 @@ END3
       @options[var] = "@_out_buf"
       @options[:freeze] = true
       @items = [2]
-      i = 0
+      i = i = 0
       check_output(<<END1, <<END2, <<END3){}
 <table>
   <% for item in @items %>
@@ -493,7 +493,7 @@ END3
 
   it "should handle <%% and <%# syntax" do
     @items = [2]
-    i = 0
+    i = i = 0
     check_output(<<END1, <<END2, <<END3){}
 <table>
 <%% for item in @items %>
@@ -530,7 +530,7 @@ END3
     @options[:literal_prefix] = "{%"
     @options[:literal_postfix] = "%}"
     @items = [2]
-    i = 0
+    i = i = 0
     check_output(<<END1, <<END2, <<END3){}
 <table>
   <%% for item in @items %>
@@ -563,7 +563,7 @@ END3
   it "should handle :trim => false option" do
     @options[:trim] = false
     @items = [2]
-    i = 0
+    i = i = 0
     check_output(<<END1, <<END2, <<END3){}
 <table>
   <% for item in @items %>
@@ -574,8 +574,8 @@ END3
     <td><%== item %></td>
   </tr>
   <% end %><%#%>
-  <% i %>a
-  <% i %>
+  <% i = 1 %>a
+  <% i = 1 %>
 </table>
 END1
 _buf = ::String.new; _buf << '<table>
@@ -588,8 +588,8 @@ _buf = ::String.new; _buf << '<table>
   </tr>
 '; _buf << '  '; end ;
  _buf << '
-'; _buf << '  '; i ; _buf << 'a
-'; _buf << '  '; i ; _buf << '
+'; _buf << '  '; i = 1 ; _buf << 'a
+'; _buf << '  '; i = 1 ; _buf << '
 '; _buf << '</table>
 ';
 _buf.to_s
@@ -611,8 +611,8 @@ END3
     it "should handle :#{opt} and :escapefunc options" do
       @options[opt] = true
       @options[:escapefunc] = 'h.call'
-      h = proc{|s| s.to_s*2}
-      list = ['2']
+      h = h = proc{|s| s.to_s*2}
+      list = list = ['2']
       check_output(<<END1, <<END2, <<END3){}
 <table>
  <tbody>
@@ -657,7 +657,7 @@ END3
 
   it "should handle :escape option without :escapefunc option" do
     @options[:escape] = true
-    list = ['&\'<>"2']
+    list = list = ['&\'<>"2']
     check_output(<<END1, <<END2, <<END3){}
 <table>
  <tbody>
@@ -699,7 +699,7 @@ END3
   it "should handle :preamble and :postamble options" do
     @options[:preamble] = '_buf = String.new("1");'
     @options[:postamble] = "_buf[0...18]\n"
-    list = ['2']
+    list = list = ['2']
     check_output(<<END1, <<END2, <<END3){}
 <table>
  <tbody>
@@ -797,11 +797,11 @@ END3
     check_output(<<END1, <<END2, <<END3) {}
 <%|= bar do |item| %>
 Let's eat <%= item %>!
-<% nil %><%| end %>
+<% i = nil %><%| end %>
 END1
 @a = ::String.new;begin; (__erubi_stack ||= []) << @a; @a = ::String.new; __erubi_stack.last << (( bar do |item|  @a << '
 '; @a << 'Let\\'s eat '; @a << ( item ).to_s; @a << '!
-'; nil ; @a;  end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
+'; i = nil ; @a;  end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 ';
 @a.to_s
 END2

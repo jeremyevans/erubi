@@ -42,7 +42,7 @@ end
 
 spec = proc do |env|
   env.each{|k,v| ENV[k] = v}
-  sh "#{FileUtils::RUBY} test/test.rb"
+  sh "#{FileUtils::RUBY} #{'-w' if RUBY_VERSION >= '3'} test/test.rb"
   env.each{|k,v| ENV.delete(k)}
 end
 
@@ -56,11 +56,6 @@ task :default=>:spec
 desc "Run specs with coverage"
 task "spec_cov" do
   spec.call('COVERAGE'=>'1')
-end
-  
-desc "Run specs with -w, some warnings filtered"
-task "spec_w" do
-  sh "#{FileUtils::RUBY} test/test_w.rb"
 end
 
 ### Other
