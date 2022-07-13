@@ -80,6 +80,18 @@ describe Erubi::Engine do
     end
   end
 
+  it "should handle no tags with frozen source" do
+    check_output(<<END1.freeze, <<END2, <<END3){}
+a
+END1
+_buf = ::String.new; _buf << 'a
+';
+_buf.to_s
+END2
+a
+END3
+  end
+
   it "should handle no options" do
     list = list = ['&\'<>"2']
     check_output(<<END1, <<END2, <<END3){}
