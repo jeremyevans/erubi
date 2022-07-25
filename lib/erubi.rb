@@ -100,7 +100,7 @@ module Erubi
       unless @escapefunc = properties[:escapefunc]
         if escape
           @escapefunc = '__erubi.h'
-          src << "__erubi = ::Erubi;"
+          src << "__erubi = ::Erubi; "
         else
           @escapefunc = '::Erubi.h'
         end

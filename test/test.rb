@@ -380,7 +380,7 @@ END3
  </tbody>
 </table>
 END1
-#{'__erubi = ::Erubi;' unless escape}@a = ::String.new; @a << '<table>
+#{'__erubi = ::Erubi; ' unless escape}@a = ::String.new; @a << '<table>
  <tbody>
 '; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = ::String.new; __erubi_stack.last << (( bar do  @a << '
 '; @a << '   <b>'; @a << #{!escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</b>
@@ -416,7 +416,7 @@ END3
  </tbody>
 </table>
 END1
-#{'__erubi = ::Erubi;' if escape}@a = ::String.new; @a << '<table>
+#{'__erubi = ::Erubi; ' if escape}@a = ::String.new; @a << '<table>
  <tbody>
 '; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = ::String.new; __erubi_stack.last << #{escape ? '__erubi' : '::Erubi'}.h(( bar do  @a << '
 '; @a << '   <b>'; @a << #{escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</b>
@@ -450,7 +450,7 @@ END3
  </tbody>
 </table>
 END1
-#{'__erubi = ::Erubi;' if escape}@a = ::String.new; @a << '<table>
+#{'__erubi = ::Erubi; ' if escape}@a = ::String.new; @a << '<table>
  <tbody>
 '; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = ::String.new; __erubi_stack.last << #{escape ? '__erubi' : '::Erubi'}.h(( quux do |i|  @a << '
 '; @a << '   <b>'; @a << #{escape ? '__erubi' : '::Erubi'}.h(( "\#{i}&" )); @a << '</b>
@@ -489,7 +489,7 @@ END3
  </tbody>
 </table>
 END1
-#{'__erubi = ::Erubi;' if escape}@a = ::String.new; @a << '<table>
+#{'__erubi = ::Erubi; ' if escape}@a = ::String.new; @a << '<table>
  <tbody>
 '; @a << '  ';begin; (__erubi_stack ||= []) << @a; @a = ::String.new; __erubi_stack.last << #{escape ? '__erubi' : '::Erubi'}.h(( bar do  @a << '
 '; @a << '   <b>'; @a << #{escape ? '__erubi' : '::Erubi'}.h(( '&' )); @a << '</b>
@@ -730,7 +730,7 @@ END3
  </tbody>
 </table>
 END1
-__erubi = ::Erubi;_buf = ::String.new; _buf << '<table>
+__erubi = ::Erubi; _buf = ::String.new; _buf << '<table>
  <tbody>
 ';   i = 0
      list.each_with_index do |item, i| 
