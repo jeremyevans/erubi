@@ -1,3 +1,7 @@
+=== master
+
+* Avoid unnecessary defined? usage on Ruby 3+ when using the :ensure option (jeremyevans)
+
 === 1.10.0 (2020-11-13)
 
 * Improve template parsing, mostly by reducing allocations (jeremyevans)

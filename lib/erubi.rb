@@ -14,6 +14,7 @@ module Erubi
 
   TEXT_END = RUBY_VERSION >= '2.1' ? "'.freeze;" : "';"
   MATCH_METHOD = RUBY_VERSION >= '2.4' ? :match? : :match
+  SKIP_DEFINED_FOR_INSTANCE_VARIABLE = RUBY_VERSION > '3'
   # :nocov:
 
   begin
@@ -87,7 +88,14 @@ module Erubi
 
       @src = src = properties[:src] || String.new
       src << "# frozen_string_literal: true\n" if properties[:freeze]
-      src << "begin; __original_outvar = #{bufvar} if defined?(#{bufvar}); " if properties[:ensure]
+      if properties[:ensure]
+        src << "begin; __original_outvar = #{bufvar}"
+        if SKIP_DEFINED_FOR_INSTANCE_VARIABLE && /\A@[^@]/ =~ bufvar
+          src << "; "
+        else
+          src << " if defined?(#{bufvar}); "
+        end
+      end
 
       unless @escapefunc = properties[:escapefunc]
         if escape

@@ -261,7 +261,7 @@ END3
 </table>
 <%== i+1 %>
 END1
-begin; __original_outvar = @a if defined?(@a); @a = ::String.new; @a << '<table>
+begin; __original_outvar = @a#{' if defined?(@a)' if RUBY_VERSION < '3'}; @a = ::String.new; @a << '<table>
  <tbody>
 ';   i = 0
      list.each_with_index do |item, i| 
@@ -290,6 +290,53 @@ END2
 1
 END3
     @a.must_equal 'bar'
+  end
+
+  it "should handle ensure option with no bufvar" do
+    list = list = ['&\'<>"2']
+    @options[:ensure] = true
+    check_output(<<END1, <<END2, <<END3){}
+<table>
+ <tbody>
+  <% i = 0
+     list.each_with_index do |item, i| %>
+  <tr>
+   <td><%= i+1 %></td>
+   <td><%== item %></td>
+  </tr>
+ <% end %>
+ </tbody>
+</table>
+<%== i+1 %>
+END1
+begin; __original_outvar = _buf if defined?(_buf); _buf = ::String.new; _buf << '<table>
+ <tbody>
+';   i = 0
+     list.each_with_index do |item, i| 
+ _buf << '  <tr>
+   <td>'; _buf << ( i+1 ).to_s; _buf << '</td>
+   <td>'; _buf << ::Erubi.h(( item )); _buf << '</td>
+  </tr>
+';  end 
+ _buf << ' </tbody>
+</table>
+'; _buf << ::Erubi.h(( i+1 )); _buf << '
+';
+_buf.to_s
+; ensure
+  _buf = __original_outvar
+end
+END2
+<table>
+ <tbody>
+  <tr>
+   <td>1</td>
+   <td>&amp;&#39;&lt;&gt;&quot;2</td>
+  </tr>
+ </tbody>
+</table>
+1
+END3
   end
 
   it "should handle trailing rspace with - modifier in <%|= and <%|" do
