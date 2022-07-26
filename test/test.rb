@@ -39,7 +39,7 @@ describe Erubi::Engine do
     t = (@options[:engine] || Erubi::Engine).new(input, @options)
     tsrc = t.src
     eval(tsrc, block.binding).must_equal result
-    tsrc = tsrc.gsub("'.freeze;", "';") if RUBY_VERSION >= '2.1'
+    tsrc = tsrc.gsub(/\.freeze/, '') if RUBY_VERSION >= '2.1'
     tsrc.must_equal src
   end
 
@@ -290,6 +290,50 @@ END2
 1
 END3
     @a.must_equal 'bar'
+  end
+
+  it "should handle chain_appends option" do
+    @options[:chain_appends] = true
+    list = list = ['&\'<>"2']
+    check_output(<<END1, <<END2, <<END3){}
+<table>
+ <tbody>
+  <% i = 0
+     list.each_with_index do |item, i| %>
+  <tr>
+   <td><%= i+1 %></td>
+   <td><%== item %></td>
+  </tr>
+ <% end %>
+ </tbody>
+</table>
+<%== i+1 %>
+END1
+_buf = ::String.new;; _buf << '<table>
+ <tbody>
+';    i = 0
+     list.each_with_index do |item, i| 
+; _buf << '  <tr>
+   <td>' << ( i+1 ).to_s << '</td>
+   <td>' << ::Erubi.h(( item )) << '</td>
+  </tr>
+';   end 
+; _buf << ' </tbody>
+</table>
+' << ::Erubi.h(( i+1 )) << '
+'
+; _buf.to_s
+END2
+<table>
+ <tbody>
+  <tr>
+   <td>1</td>
+   <td>&amp;&#39;&lt;&gt;&quot;2</td>
+  </tr>
+ </tbody>
+</table>
+1
+END3
   end
 
   it "should handle ensure option with no bufvar" do

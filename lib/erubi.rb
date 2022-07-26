@@ -12,7 +12,7 @@ module Erubi
     RANGE_LAST = -1..-1
   end
 
-  TEXT_END = RUBY_VERSION >= '2.1' ? "'.freeze;" : "';"
+  TEXT_END = RUBY_VERSION >= '2.1' ? "'.freeze" : "'"
   MATCH_METHOD = RUBY_VERSION >= '2.4' ? :match? : :match
   SKIP_DEFINED_FOR_INSTANCE_VARIABLE = RUBY_VERSION > '3'
   # :nocov:
@@ -60,6 +60,9 @@ module Erubi
     # Initialize a new Erubi::Engine.  Options:
     # +:bufval+ :: The value to use for the buffer variable, as a string (default <tt>'::String.new'</tt>).
     # +:bufvar+ :: The variable name to use for the buffer variable, as a string.
+    # +:chain_appends+ :: Whether to chain <tt><<</t> calls to the buffer variable. Offers better
+    #                     performance, but can cause issues when the buffer variable is reassigned during
+    #                     template rendering (default +false+).
     # +:ensure+ :: Wrap the template in a begin/ensure block restoring the previous value of bufvar.
     # +:escapefunc+ :: The function to use for escaping, as a string (default: <tt>'::Erubi.h'</tt>).
     # +:escape+ :: Whether to make <tt><%=</tt> escape by default, and <tt><%==</tt> not escape by default.
@@ -85,7 +88,9 @@ module Erubi
       literal_postfix = properties[:literal_postfix] || '%>'
       preamble   = properties[:preamble] || "#{bufvar} = #{bufval};"
       postamble  = properties[:postamble] || "#{bufvar}.to_s\n"
+      @chain_appends = properties[:chain_appends]
 
+      @buffer_on_stack = false
       @src = src = properties[:src] || String.new
       src << "# frozen_string_literal: true\n" if properties[:freeze]
       if properties[:ensure]
@@ -194,13 +199,16 @@ module Erubi
       else
         text.gsub!(/['\\]/, '\\\\\&')
       end
-      @src << " " << @bufvar << " << '" << text << TEXT_END
+
+      with_buffer{@src << " << '" << text << TEXT_END}
     end
 
     # Add ruby code to the template
     def add_code(code)
+      terminate_expression
       @src << code
       @src << ';' unless code[RANGE_LAST] == "\n"
+      @buffer_on_stack = false
     end
 
     # Add the given ruby expression result to the template,
@@ -215,23 +223,52 @@ module Erubi
 
     # Add the result of Ruby expression to the template
     def add_expression_result(code)
-      @src << ' ' << @bufvar << ' << (' << code << ').to_s;'
+      with_buffer{@src << ' << (' << code << ').to_s'}
     end
 
     # Add the escaped result of Ruby expression to the template
     def add_expression_result_escaped(code)
-      @src << ' ' << @bufvar << ' << ' << @escapefunc << '((' << code << '));'
+      with_buffer{@src << ' << ' << @escapefunc << '((' << code << '))'}
     end
 
     # Add the given postamble to the src.  Can be overridden in subclasses
     # to make additional changes to src that depend on the current state.
     def add_postamble(postamble)
-      src << postamble
+      terminate_expression
+      @src << postamble
     end
 
     # Raise an exception, as the base engine class does not support handling other indicators.
     def handle(indicator, code, tailch, rspace, lspace)
       raise ArgumentError, "Invalid indicator: #{indicator}"
+    end
+
+    # Make sure the buffer variable is the target of the next append
+    # before yielding to the block. Mark that the buffer is the target
+    # of the next append after the block executes.
+    #
+    # This method should only be called if the block will result in
+    # code where << will append to the bufvar.
+    def with_buffer
+      if @chain_appends
+        unless @buffer_on_stack
+          @src << '; ' << @bufvar
+        end
+        yield
+        @buffer_on_stack = true
+      else
+        @src << ' ' << @bufvar
+        yield
+        @src << ';'
+      end
+    end
+
+    # Make sure that any current expression has been terminated.
+    # The default is to terminate all expressions, but when
+    # the chain_appends option is used, expressions may not be
+    # terminated.
+    def terminate_expression
+      @src << '; ' if @chain_appends
     end
   end
 end

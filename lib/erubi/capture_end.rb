@@ -36,13 +36,19 @@ module Erubi
         rspace = nil if tailch && !tailch.empty?
         add_text(lspace) if lspace
         escape_capture = !((indicator == '|=') ^ @escape_capture)
-        src << "begin; (#{@bufstack} ||= []) << #{@bufvar}; #{@bufvar} = #{@bufval}; #{@bufstack}.last << #{@escapefunc if escape_capture}((" << code
+        terminate_expression
+        @src << "begin; (#{@bufstack} ||= []) << #{@bufvar}; #{@bufvar} = #{@bufval}; #{@bufstack}.last << #{@escapefunc if escape_capture}((" << code
+        @buffer_on_stack = false
         add_text(rspace) if rspace
       when '|'
         rspace = nil if tailch && !tailch.empty?
         add_text(lspace) if lspace
-        result = @yield_returns_buffer ? " #{@bufvar}; " : ""
-        src << result << code << ")).to_s; ensure; #{@bufvar} = #{@bufstack}.pop; end;"
+        if @yield_returns_buffer
+          terminate_expression
+          @src << " #{@bufvar}; "
+        end
+        @src << code << ")).to_s; ensure; #{@bufvar} = #{@bufstack}.pop; end;"
+        @buffer_on_stack = false
         add_text(rspace) if rspace
       else
         super

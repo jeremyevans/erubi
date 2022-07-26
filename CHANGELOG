@@ -1,5 +1,7 @@
 === master
 
+* Support :chain_appends option for chaining appends to the buffer variable (casperisfine, jeremyevans) (#32)
+
 * Avoid unnecessary defined? usage on Ruby 3+ when using the :ensure option (jeremyevans)
 
 === 1.10.0 (2020-11-13)
