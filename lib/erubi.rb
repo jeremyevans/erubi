@@ -12,7 +12,7 @@ module Erubi
     RANGE_LAST = -1..-1
   end
 
-  TEXT_END = RUBY_VERSION >= '2.1' ? "'.freeze;" : "';"
+  TEXT_END = RUBY_VERSION >= '2.1' ? "'.freeze" : "'"
   MATCH_METHOD = RUBY_VERSION >= '2.4' ? :match? : :match
   SKIP_DEFINED_FOR_INSTANCE_VARIABLE = RUBY_VERSION > '3'
   # :nocov:
@@ -85,7 +85,9 @@ module Erubi
       literal_postfix = properties[:literal_postfix] || '%>'
       preamble   = properties[:preamble] || "#{bufvar} = #{bufval};"
       postamble  = properties[:postamble] || "#{bufvar}.to_s\n"
+      @immutable_bufvar = properties[:immutable_bufvar]
 
+      @buffer_on_stack = false
       @src = src = properties[:src] || String.new
       src << "# frozen_string_literal: true\n" if properties[:freeze]
       if properties[:ensure]
@@ -194,44 +196,63 @@ module Erubi
       else
         text.gsub!(/['\\]/, '\\\\\&')
       end
-      @src << " " << @bufvar << " << '" << text << TEXT_END
+
+      push_buffer
+      @src << " << '" << text << TEXT_END
+      @buffer_on_stack = true
     end
 
     # Add ruby code to the template
     def add_code(code)
+      pop_buffer
       @src << code
       @src << ';' unless code[RANGE_LAST] == "\n"
+      @buffer_on_stack = false
     end
 
     # Add the given ruby expression result to the template,
     # escaping it based on the indicator given and escape flag.
     def add_expression(indicator, code)
+      push_buffer
       if ((indicator == '=') ^ @escape)
         add_expression_result(code)
       else
         add_expression_result_escaped(code)
       end
+      @buffer_on_stack = true
     end
 
     # Add the result of Ruby expression to the template
     def add_expression_result(code)
-      @src << ' ' << @bufvar << ' << (' << code << ').to_s;'
+      @src << ' << (' << code << ').to_s'
     end
 
     # Add the escaped result of Ruby expression to the template
     def add_expression_result_escaped(code)
-      @src << ' ' << @bufvar << ' << ' << @escapefunc << '((' << code << '));'
+      @src << ' << ' << @escapefunc << '((' << code << '))'
     end
 
     # Add the given postamble to the src.  Can be overridden in subclasses
     # to make additional changes to src that depend on the current state.
     def add_postamble(postamble)
-      src << postamble
+      src << ';' << postamble
     end
 
     # Raise an exception, as the base engine class does not support handling other indicators.
     def handle(indicator, code, tailch, rspace, lspace)
       raise ArgumentError, "Invalid indicator: #{indicator}"
+    end
+
+    def push_buffer
+      if !@immutable_bufvar || (@immutable_bufvar && !@buffer_on_stack)
+        @src << '; ' << @bufvar
+      end
+      @buffer_on_stack = true
+    end
+
+    def pop_buffer
+      @src << '; '
+      @buffer_on_stack = false
     end
   end
 end
