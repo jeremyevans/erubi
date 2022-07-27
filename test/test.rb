@@ -35,11 +35,11 @@ describe Erubi::Engine do
     @options = {}
   end
 
-  def check_output(input, src, result, &block)
+  def check_output(input, src, result, strip_freeze: RUBY_VERSION >= '2.1', &block)
     t = (@options[:engine] || Erubi::Engine).new(input, @options)
     tsrc = t.src
     eval(tsrc, block.binding).must_equal result
-    tsrc = tsrc.gsub(/\.freeze/, '') if RUBY_VERSION >= '2.1'
+    tsrc = tsrc.gsub(/\.freeze/, '') if strip_freeze
     tsrc.must_equal src
   end
 
@@ -323,6 +323,94 @@ _buf = ::String.new;; _buf << '<table>
 ' << ::Erubi.h(( i+1 )) << '
 '
 ; _buf.to_s
+END2
+<table>
+ <tbody>
+  <tr>
+   <td>1</td>
+   <td>&amp;&#39;&lt;&gt;&quot;2</td>
+  </tr>
+ </tbody>
+</table>
+1
+END3
+  end
+
+  it "should handle :freeze_template_literals => true option" do
+    @options[:freeze_template_literals] = true
+    list = list = ['&\'<>"2']
+    check_output(<<END1, <<END2, <<END3, strip_freeze: false){}
+<table>
+ <tbody>
+  <% i = 0
+     list.each_with_index do |item, i| %>
+  <tr>
+   <td><%= i+1 %></td>
+   <td><%== item %></td>
+  </tr>
+ <% end %>
+ </tbody>
+</table>
+<%== i+1 %>
+END1
+_buf = ::String.new; _buf << '<table>
+ <tbody>
+'.freeze;   i = 0
+     list.each_with_index do |item, i| 
+ _buf << '  <tr>
+   <td>'.freeze; _buf << ( i+1 ).to_s; _buf << '</td>
+   <td>'.freeze; _buf << ::Erubi.h(( item )); _buf << '</td>
+  </tr>
+'.freeze;  end 
+ _buf << ' </tbody>
+</table>
+'.freeze; _buf << ::Erubi.h(( i+1 )); _buf << '
+'.freeze;
+_buf.to_s
+END2
+<table>
+ <tbody>
+  <tr>
+   <td>1</td>
+   <td>&amp;&#39;&lt;&gt;&quot;2</td>
+  </tr>
+ </tbody>
+</table>
+1
+END3
+  end
+
+  it "should handle :freeze_template_literals => false option" do
+    @options[:freeze_template_literals] = false
+    list = list = ['&\'<>"2']
+    check_output(<<END1, <<END2, <<END3, strip_freeze: false){}
+<table>
+ <tbody>
+  <% i = 0
+     list.each_with_index do |item, i| %>
+  <tr>
+   <td><%= i+1 %></td>
+   <td><%== item %></td>
+  </tr>
+ <% end %>
+ </tbody>
+</table>
+<%== i+1 %>
+END1
+_buf = ::String.new; _buf << '<table>
+ <tbody>
+';   i = 0
+     list.each_with_index do |item, i| 
+ _buf << '  <tr>
+   <td>'; _buf << ( i+1 ).to_s; _buf << '</td>
+   <td>'; _buf << ::Erubi.h(( item )); _buf << '</td>
+  </tr>
+';  end 
+ _buf << ' </tbody>
+</table>
+'; _buf << ::Erubi.h(( i+1 )); _buf << '
+';
+_buf.to_s
 END2
 <table>
  <tbody>

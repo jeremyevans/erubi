@@ -12,7 +12,6 @@ module Erubi
     RANGE_LAST = -1..-1
   end
 
-  TEXT_END = RUBY_VERSION >= '2.1' ? "'.freeze" : "'"
   MATCH_METHOD = RUBY_VERSION >= '2.4' ? :match? : :match
   SKIP_DEFINED_FOR_INSTANCE_VARIABLE = RUBY_VERSION > '3'
   # :nocov:
@@ -69,6 +68,7 @@ module Erubi
     # +:escape_html+ :: Same as +:escape+, with lower priority.
     # +:filename+ :: The filename for the template.
     # +:freeze+ :: Whether to enable frozen string literals in the resulting source code.
+    # +:freeze_template_literals+ :: Wether suffix all literal strings with <tt>.freeze</tt> (default: <tt>true</tt> on Ruby 2.1+, <tt>false</tt> on Ruby2.0 and older).
     # +:literal_prefix+ :: The prefix to output when using escaped tag delimiters (default <tt>'<%'</tt>).
     # +:literal_postfix+ :: The postfix to output when using escaped tag delimiters (default <tt>'%>'</tt>).
     # +:outvar+ :: Same as +:bufvar+, with lower priority.
@@ -89,6 +89,11 @@ module Erubi
       preamble   = properties[:preamble] || "#{bufvar} = #{bufval};"
       postamble  = properties[:postamble] || "#{bufvar}.to_s\n"
       @chain_appends = properties[:chain_appends]
+      @text_end = if properties.fetch(:freeze_template_literals, RUBY_VERSION >= '2.1')
+        "'.freeze"
+      else
+        "'"
+      end
 
       @buffer_on_stack = false
       @src = src = properties[:src] || String.new
@@ -200,7 +205,7 @@ module Erubi
         text.gsub!(/['\\]/, '\\\\\&')
       end
 
-      with_buffer{@src << " << '" << text << TEXT_END}
+      with_buffer{@src << " << '" << text << @text_end}
     end
 
     # Add ruby code to the template
