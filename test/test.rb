@@ -35,10 +35,11 @@ describe Erubi::Engine do
     @options = {}
   end
 
-  def check_output(input, src, result, strip_freeze: RUBY_VERSION >= '2.1', &block)
+  def check_output(input, src, result, &block)
     t = (@options[:engine] || Erubi::Engine).new(input, @options)
     tsrc = t.src
     eval(tsrc, block.binding).must_equal result
+    strip_freeze = defined?(@strip_freeze) ? @strip_freeze : RUBY_VERSION >= '2.1'
     tsrc = tsrc.gsub(/\.freeze/, '') if strip_freeze
     tsrc.must_equal src
   end
@@ -339,7 +340,8 @@ END3
   it "should handle :freeze_template_literals => true option" do
     @options[:freeze_template_literals] = true
     list = list = ['&\'<>"2']
-    check_output(<<END1, <<END2, <<END3, strip_freeze: false){}
+    @strip_freeze = false
+    check_output(<<END1, <<END2, <<END3){}
 <table>
  <tbody>
   <% i = 0
@@ -383,7 +385,8 @@ END3
   it "should handle :freeze_template_literals => false option" do
     @options[:freeze_template_literals] = false
     list = list = ['&\'<>"2']
-    check_output(<<END1, <<END2, <<END3, strip_freeze: false){}
+    @strip_freeze = false
+    check_output(<<END1, <<END2, <<END3){}
 <table>
  <tbody>
   <% i = 0

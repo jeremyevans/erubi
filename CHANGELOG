@@ -1,5 +1,7 @@
 === master
 
+* Support :freeze_template_literals option for configuring whether to add .freeze to template literal strings (casperisfine) (#33)
+
 * Support :chain_appends option for chaining appends to the buffer variable (casperisfine, jeremyevans) (#32)
 
 * Avoid unnecessary defined? usage on Ruby 3+ when using the :ensure option (jeremyevans)

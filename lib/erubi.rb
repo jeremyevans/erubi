@@ -67,8 +67,14 @@ module Erubi
     # +:escape+ :: Whether to make <tt><%=</tt> escape by default, and <tt><%==</tt> not escape by default.
     # +:escape_html+ :: Same as +:escape+, with lower priority.
     # +:filename+ :: The filename for the template.
-    # +:freeze+ :: Whether to enable frozen string literals in the resulting source code.
-    # +:freeze_template_literals+ :: Wether suffix all literal strings with <tt>.freeze</tt> (default: <tt>true</tt> on Ruby 2.1+, <tt>false</tt> on Ruby2.0 and older).
+    # +:freeze+ :: Whether to enable add a <tt>frozen_string_literal: true</tt> magic comment at the top of
+    #              the resulting source code.  Note this may cause problems if you are wrapping the resulting
+    #              source code in other code, because the magic comment only has an effect at the beginning of
+    #              the file, and having the magic comment later in the file can trigger warnings.
+    # +:freeze_template_literals+ :: Whether to suffix all literal strings for template code with <tt>.freeze</tt>
+    #                                (default: +true+ on Ruby 2.1+, +false+ on Ruby 2.0 and older).
+    #                                Can be set to +false+ on Ruby 2.3+ when frozen string literals are enabled
+    #                                in order to improve performance.
     # +:literal_prefix+ :: The prefix to output when using escaped tag delimiters (default <tt>'<%'</tt>).
     # +:literal_postfix+ :: The postfix to output when using escaped tag delimiters (default <tt>'%>'</tt>).
     # +:outvar+ :: Same as +:bufvar+, with lower priority.
