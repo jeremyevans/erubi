@@ -1,4 +1,4 @@
-=== master
+=== 1.11.0 (2022-08-02)
 
 * Support :freeze_template_literals option for configuring whether to add .freeze to template literal strings (casperisfine) (#33)
 
