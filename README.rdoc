@@ -9,7 +9,7 @@ the same basic algorithm, with the following differences:
 * Automatically freezes strings for template text when ruby optimizes it (on ruby 2.1+)
 * Escapes <tt>'</tt> (apostrophe) when escaping for better XSS protection 
 * Has 6x faster escaping on ruby 2.3+ by using cgi/escape
-* Has 86% smaller memory footprint
+* Has 81% smaller memory footprint (calculated using +ObjectSpace.memsize_of_all+)
 * Does no monkey patching (Erubis adds a method to Kernel)
 * Uses an immutable design (all options passed to the constructor, which returns a frozen object)
 * Has simpler internals (1 file, <150 lines of code)
