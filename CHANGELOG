@@ -1,3 +1,7 @@
+=== master
+
+* Default :freeze_template_literals option to false if running with --enable-frozen-string-literal (casperisfine) (#35)
+
 === 1.11.0 (2022-08-02)
 
 * Support :freeze_template_literals option for configuring whether to add .freeze to template literal strings (casperisfine) (#33)
