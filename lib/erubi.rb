@@ -14,6 +14,7 @@ module Erubi
 
   MATCH_METHOD = RUBY_VERSION >= '2.4' ? :match? : :match
   SKIP_DEFINED_FOR_INSTANCE_VARIABLE = RUBY_VERSION > '3'
+  FREEZE_TEMPLATE_LITERALS = !eval("''").frozen? && RUBY_VERSION >= '2.1'
   # :nocov:
 
   begin
@@ -95,7 +96,7 @@ module Erubi
       preamble   = properties[:preamble] || "#{bufvar} = #{bufval};"
       postamble  = properties[:postamble] || "#{bufvar}.to_s\n"
       @chain_appends = properties[:chain_appends]
-      @text_end = if properties.fetch(:freeze_template_literals, RUBY_VERSION >= '2.1')
+      @text_end = if properties.fetch(:freeze_template_literals, FREEZE_TEMPLATE_LITERALS)
         "'.freeze"
       else
         "'"
