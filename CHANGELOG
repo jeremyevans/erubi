@@ -1,5 +1,7 @@
 === master
 
+* Use erb/escape for faster html escaping if available (jeremyevans)
+
 * Default :freeze_template_literals option to false if running with --enable-frozen-string-literal (casperisfine) (#35)
 
 === 1.11.0 (2022-08-02)
