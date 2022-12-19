@@ -991,11 +991,11 @@ END3
     check_output(<<END1, <<END2, <<END3) {}
 <%|= bar do |item| %>
 Let's eat <%= item %>!
-<% i = nil %><%| end %>
+<% i = i = nil %><%| end %>
 END1
 @a = ::String.new;begin; (__erubi_stack ||= []) << @a; @a = ::String.new; __erubi_stack.last << (( bar do |item|  @a << '
 '; @a << 'Let\\'s eat '; @a << ( item ).to_s; @a << '!
-'; i = nil ; @a;  end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
+'; i = i = nil ; @a;  end )).to_s; ensure; @a = __erubi_stack.pop; end; @a << '
 ';
 @a.to_s
 END2
