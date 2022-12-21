@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "minitest-global_expectations"
   s.metadata = {
     'bug_tracker_uri'   => 'https://github.com/jeremyevans/erubi/issues',
+    'mailing_list_uri'  => 'https://github.com/jeremyevans/erubi/discussions',
     'changelog_uri'     => 'https://github.com/jeremyevans/erubi/blob/master/CHANGELOG',
     'source_code_uri'   => 'https://github.com/jeremyevans/erubi',
   }
