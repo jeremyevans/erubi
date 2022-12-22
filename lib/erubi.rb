@@ -19,7 +19,9 @@ module Erubi
 
   begin
     require 'erb/escape'
+    # :nocov:
     define_singleton_method(:h, ERB::Escape.instance_method(:html_escape))
+    # :nocov:
   rescue LoadError
     begin
       require 'cgi/escape'
