@@ -16,7 +16,7 @@ end
 RDOC_DEFAULT_OPTS = ["--line-numbers", "--inline-source", '--title', 'Erubi: Small ERB Implementation']
 
 begin
-  gem 'hanna-nouveau'
+  gem 'hanna'
   RDOC_DEFAULT_OPTS.concat(['-f', 'hanna'])
 rescue Gem::LoadError
 end
