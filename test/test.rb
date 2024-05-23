@@ -25,6 +25,7 @@ end
 
 require 'erubi'
 require 'erubi/capture_end'
+require 'erubi/capture_block'
 
 ENV['MT_NO_PLUGINS'] = '1' # Work around stupid autoloading of plugins
 gem 'minitest'
@@ -39,6 +40,7 @@ describe 'Erubi' do
     t = @engine.new(input, @options)
     tsrc = t.src
     eval(tsrc, block.binding).must_equal result
+    return if @engine <= Erubi::CaptureBlockEngine && !@check_src
     strip_freeze = defined?(@strip_freeze) ? @strip_freeze : RUBY_VERSION >= '2.1'
     tsrc = tsrc.gsub(/\.freeze/, '') if strip_freeze
     tsrc.must_equal src
@@ -57,31 +59,46 @@ describe 'Erubi' do
   end
 
   def setup_bar
-    def self.bar
-      @a << "a"
-      yield
-      @a << 'b'
-      @a.upcase
-    end
-    def self.baz
-      @a << "c"
-      yield
-      @a << 'd'
-      @a * 2
-    end
-    def self.quux
-      @a << "a"
-      3.times do |i|
-        @a << "c#{i}"
-        yield i
-        @a << "d#{i}"
+    if @engine <= Erubi::CaptureBlockEngine
+      def self.bar(&block)
+        "a#{@a.capture(&block)}b".upcase
       end
-      @a << "b"
-      @a.upcase
+      def self.baz(&block)
+        "c#{@a.capture(&block)}d" * 2
+      end
+      def self.quux(&block)
+        v = 3.times.map do |i|
+          "c#{i}#{@a.capture(i, &block)}d#{i}"
+        end.join
+        "a#{v}b".upcase
+      end
+    else
+      def self.bar
+        @a << "a"
+        yield
+        @a << 'b'
+        @a.upcase
+      end
+      def self.baz
+        @a << "c"
+        yield
+        @a << 'd'
+        @a * 2
+      end
+      def self.quux
+        @a << "a"
+        3.times do |i|
+          @a << "c#{i}"
+          yield i
+          @a << "d#{i}"
+        end
+        @a << "b"
+        @a.upcase
+      end
     end
   end
 
-  {'Engine'=>Erubi::Engine, 'CaptureEndEngine'=>Erubi::CaptureEndEngine}.each do |desc, engine|
+  {'Engine'=>Erubi::Engine, 'CaptureEndEngine'=>Erubi::CaptureEndEngine, 'CaptureBlockEngine'=>Erubi::CaptureBlockEngine}.each do |desc, engine|
     describe desc do
       before do
         @engine = engine
@@ -680,7 +697,7 @@ END2
 1
 END3
         end
-      end
+      end unless engine == Erubi::CaptureBlockEngine
 
       it "should handle :escape option without :escapefunc option" do
         @options[:escape] = true
@@ -759,7 +776,7 @@ END2
 1<table>
  <tbody>
 END3
-      end
+      end unless engine == Erubi::CaptureBlockEngine
 
       it "should have working filename accessor" do
         engine.new('', :filename=>'foo.rb').filename.must_equal 'foo.rb'
@@ -790,43 +807,68 @@ END3
     end
   end
 
-  describe 'CaptureEndEngine' do
-    before do
-      @engine = ::Erubi::CaptureEndEngine
+  # Hack to allow CaptureEndEngine tests to pass with minimal changes on CaptureBlock engine
+  capture_block_engine = Class.new(::Erubi::CaptureBlockEngine) do
+    def initialize(input, opts={})
+      input = input.gsub('<%|', '<%')
+      super
     end
+  end
 
-    it "should handle trailing rspace with - modifier in <%|= and <%|" do
-      eval(@engine.new("<%|= '&' -%>\n<%| -%>\n").src).must_equal '&'
-    end
+  {
+    ::Erubi::CaptureEndEngine=>'CaptureEndEngine',
+    capture_block_engine=>'CaptureBlockEngine'
+  }.each do |engine, desc|
+    describe desc do
+      before do
+        @engine = engine
+      end
 
-    it "should handle lspace in <%|=" do
-      eval(@engine.new("<%|= %><%| %><%|= %><%| %>").src).must_equal ''
-    end
+      if engine == capture_block_engine
+        def self.it(desc)
+          desc = desc.gsub('<%|', '<%')
+          super
+        end
+      else
+        space = ' '
+        nl = "\n"
+      end
 
-    it "should have <%|= not escape by default" do
-      eval(@engine.new('<%|= "&" %><%| %>').src).must_equal '&'
-      eval(@engine.new('<%|= "&" %><%| %>', :escape=>false).src).must_equal '&'
-      eval(@engine.new('<%|= "&" %><%| %>', :escape_capture=>false).src).must_equal '&'
-      eval(@engine.new('<%|= "&" %><%| %>', :escape=>true).src).must_equal '&amp;'
-      eval(@engine.new('<%|= "&" %><%| %>', :escape_capture=>true).src).must_equal '&amp;'
-    end
+      it "should handle trailing rspace with - modifier in <%|= and <%|" do
+        eval(@engine.new("<%|= '&' -%>\n<%| -%>\n").src).must_equal '&'
+      end
 
-    it "should have <%|== escape by default" do
-      eval(@engine.new('<%|== "&" %><%| %>').src).must_equal '&amp;'
-      eval(@engine.new('<%|== "&" %><%| %>', :escape=>true).src).must_equal '&'
-      eval(@engine.new('<%|== "&" %><%| %>', :escape_capture=>true).src).must_equal '&'
-      eval(@engine.new('<%|== "&" %><%| %>', :escape=>false).src).must_equal '&amp;'
-      eval(@engine.new('<%|== "&" %><%| %>', :escape_capture=>false).src).must_equal '&amp;'
-    end
+      it "should handle lspace in <%|=" do
+        eval(@engine.new("<%|= %><%| %><%|= %><%| %>").src).must_equal ''
+      end
 
-    [['', false], ['=', true]].each do |ind, escape|
-      it "should allow <%|=#{ind} and <%| for capturing with :escape_capture => #{escape} and :escape => #{!escape}" do
-        @options[:bufvar] = '@a'
-        @options[:capture] = true
-        @options[:escape_capture] = escape
-        @options[:escape] = !escape
-        setup_bar
-        check_output(<<END1, <<END2, <<END3){}
+      it "should have <%|= not escape by default" do
+        eval(@engine.new('<%|= "&" %><%| %>').src).must_equal '&'
+        eval(@engine.new('<%|= "&" %><%| %>', :escape=>false).src).must_equal '&'
+        eval(@engine.new('<%|= "&" %><%| %>', :escape=>true).src).must_equal '&amp;'
+      end
+
+      it "should have <%|== escape by default" do
+        eval(@engine.new('<%|== "&" %><%| %>').src).must_equal '&amp;'
+        eval(@engine.new('<%|== "&" %><%| %>', :escape=>true).src).must_equal '&'
+        eval(@engine.new('<%|== "&" %><%| %>', :escape=>false).src).must_equal '&amp;'
+      end
+
+      it "should have <%|= and <%|== respect :escape_capture option" do
+        eval(@engine.new('<%|= "&" %><%| %>', :escape_capture=>false).src).must_equal '&'
+        eval(@engine.new('<%|= "&" %><%| %>', :escape_capture=>true).src).must_equal '&amp;'
+        eval(@engine.new('<%|== "&" %><%| %>', :escape_capture=>true).src).must_equal '&'
+        eval(@engine.new('<%|== "&" %><%| %>', :escape_capture=>false).src).must_equal '&amp;'
+      end unless engine == capture_block_engine
+
+      [['', false], ['=', true]].each do |ind, escape|
+        it "should allow <%|=#{ind} and <%| for capturing with :escape_capture => #{escape} and :escape => #{!escape}" do
+          @options[:bufvar] = '@a'
+          @options[:capture] = true
+          @options[:escape_capture] = escape
+          @options[:escape] = !escape
+          setup_bar
+          check_output(<<END1, <<END2, <<END3){}
 <table>
  <tbody>
   <%|=#{ind} bar do %>
@@ -853,15 +895,15 @@ END2
  </tbody>
 </table>
 END3
-      end
-    end
+        end
+      end unless engine == capture_block_engine
 
-    [['', true], ['=', false]].each do |ind, escape|
-      it "should allow <%|=#{ind} and <%| for capturing when with :escape => #{escape}" do
-        @options[:bufvar] = '@a'
-        @options[:escape] = escape
-        setup_bar
-        check_output(<<END1, <<END2, <<END3){}
+      [['', true], ['=', false]].each do |ind, escape|
+        it "should allow <%|=#{ind} and <%| for capturing when with :escape => #{escape}" do
+          @options[:bufvar] = '@a'
+          @options[:escape] = escape
+          setup_bar
+          check_output(<<END1, <<END2, <<END3){}
 <table>
  <tbody>
   <%|=#{ind} bar do %>
@@ -884,17 +926,16 @@ END2
  <tbody>
   A
    &lt;B&gt;&amp;AMP;&lt;/B&gt;
- B
- </tbody>
+#{space}B#{nl} </tbody>
 </table>
 END3
-      end
+        end
 
-      it "should handle loops in <%|=#{ind} and <%| for capturing when with :escape => #{escape}" do
-        @options[:bufvar] = '@a'
-        @options[:escape] = escape
-        setup_bar
-        check_output(<<END1, <<END2, <<END3){}
+        it "should handle loops in <%|=#{ind} and <%| for capturing when with :escape => #{escape}" do
+          @options[:bufvar] = '@a'
+          @options[:escape] = escape
+          setup_bar
+          check_output(<<END1, <<END2, <<END3){}
 <table>
  <tbody>
   <%|=#{ind} quux do |i| %>
@@ -917,21 +958,20 @@ END2
  <tbody>
   AC0
    &lt;B&gt;0&amp;AMP;&lt;/B&gt;
- D0C1
+#{space}D0C1
    &lt;B&gt;1&amp;AMP;&lt;/B&gt;
- D1C2
+#{space}D1C2
    &lt;B&gt;2&amp;AMP;&lt;/B&gt;
- D2B
- </tbody>
+#{space}D2B#{nl} </tbody>
 </table>
 END3
-      end
+        end
 
-      it "should allow <%|=#{ind} and <%| for nested capturing when with :escape => #{escape}" do
-        @options[:bufvar] = '@a'
-        @options[:escape] = escape
-        setup_bar
-        check_output(<<END1, <<END2, <<END3){}
+        it "should allow <%|=#{ind} and <%| for nested capturing when with :escape => #{escape}" do
+          @options[:bufvar] = '@a'
+          @options[:escape] = escape
+          setup_bar
+          check_output(<<END1, <<END2, <<END3){}
 <table>
  <tbody>
   <%|=#{ind} bar do %>
@@ -957,29 +997,30 @@ END2
   A
    &lt;B&gt;&amp;AMP;&lt;/B&gt;
    CEDCED
- B
- </tbody>
+#{space}B#{nl} </tbody>
 </table>
 END3
-      end
-    end
-
-    it "should respect the :yield_returns_buffer option for making templates return the (potentially modified) buffer" do
-      @options[:bufvar] = '@a'
-
-      def self.bar
-        a = String.new
-        a << "a"
-        yield 'burgers'
-        case b = (yield 'salads')
-        when String
-          a << b
-          a << 'b'
-          a.upcase
         end
       end
 
-      check_output(<<END1, <<END2, <<END3){}
+      next if engine == capture_block_engine
+
+      it "should respect the :yield_returns_buffer option for making templates return the (potentially modified) buffer" do
+        @options[:bufvar] = '@a'
+
+        def self.bar
+          a = String.new
+          a << "a"
+          yield 'burgers'
+          case b = (yield 'salads')
+          when String
+            a << b
+            a << 'b'
+            a.upcase
+          end
+        end
+
+        check_output(<<END1, <<END2, <<END3){}
 <%|= bar do |item| %>
 Let's eat <%= item %>!
 <% nil %><%| end %>
@@ -993,9 +1034,9 @@ END2
 
 END3
 
-    @options[:yield_returns_buffer] = true
+      @options[:yield_returns_buffer] = true
 
-    check_output(<<END1, <<END2, <<END3) {}
+      check_output(<<END1, <<END2, <<END3) {}
 <%|= bar do |item| %>
 Let's eat <%= item %>!
 <% i = i = nil %><%| end %>
@@ -1012,20 +1053,20 @@ LET'S EAT BURGERS!
 LET'S EAT SALADS!
 B
 END3
-    end
-
-    it "should respect the :yield_returns_buffer option for making templates return the (potentially modified) buffer as the result of the block" do
-      @options[:yield_returns_buffer] = true
-
-      def self.bar(foo = nil)
-        if foo.nil?
-          yield
-        else
-          foo
-        end
       end
 
-      check_output(<<END1, <<END2, <<END3) {}
+      it "should respect the :yield_returns_buffer option for making templates return the (potentially modified) buffer as the result of the block" do
+        @options[:yield_returns_buffer] = true
+
+        def self.bar(foo = nil)
+          if foo.nil?
+            yield
+          else
+            foo
+          end
+        end
+
+        check_output(<<END1, <<END2, <<END3) {}
 <%|= bar do %>
 Let's eat the tacos!
 <%| end %>
@@ -1047,7 +1088,7 @@ Let's eat the tacos!
 Delicious!
 END3
 
-    check_output(<<END1, <<END2, <<END3) {}
+      check_output(<<END1, <<END2, <<END3) {}
 <%|= bar("Don't eat the burgers!") do %>
 Let's eat burgers!
 <%| end %>
@@ -1066,6 +1107,117 @@ Don't eat the burgers!
 
 Delicious!
 END3
+      end
     end
   end
+
+  describe 'Erubi::CaptureBlockEngine' do
+    before do
+      @engine = Erubi::CaptureBlockEngine
+      @check_src = true
+    end
+
+    it "should handle empty tags by concatening empty string" do
+      check_output(<<END1, <<END2, <<END3){}
+<%= %><%== %>
+END1
+_buf = ::Erubi::CaptureBlockEngine::Buffer.new; _buf <<= '' ; _buf |= '' ; _buf << '
+';
+_buf.to_s
+END2
+
+END3
+    end
+
+    it "should work as specified in documentation" do
+      @options[:bufvar] = '@a'
+      def self.upcase_form(&block)
+        "<form>#{@a.capture(&block).upcase}</form>"
+      end
+      check_output(<<END1, <<END2, <<END3){}
+<%= upcase_form do %>
+  <%= 'foo' %>
+<% end %>
+
+END1
+@a = ::Erubi::CaptureBlockEngine::Buffer.new; @a <<=  upcase_form do ; @a << '
+'; @a << '  '; @a <<=  'foo' ; @a << '
+'; end 
+ @a << '
+';
+@a.to_s
+END2
+<form>
+  FOO
+</form>
+END3
+  end
+
+    [['', true], ['=', false]].each do |ind, escape|
+      it "should allow <%=#{ind} and <% for escaped capturing with :escape => #{escape}" do
+        @options[:bufvar] = '@a'
+        @options[:escape] = escape
+        setup_bar
+        check_output(<<END1, <<END2, <<END3){}
+<table>
+ <tbody>
+  <%=#{ind} bar do %>
+   <b><%=#{ind} '&' %></b>
+ <% end %>
+ </tbody>
+</table>
+END1
+#{'__erubi = ::Erubi; ' if escape}@a = ::Erubi::CaptureBlockEngine::Buffer.new; @a << '<table>
+ <tbody>
+  '; @a |=  bar do ; @a << '
+'; @a << '   <b>'; @a |=  '&' ; @a << '</b>
+';  end 
+ @a << ' </tbody>
+</table>
+';
+@a.to_s
+END2
+<table>
+ <tbody>
+  A
+   &lt;B&gt;&amp;AMP;&lt;/B&gt;
+B </tbody>
+</table>
+END3
+     end
+
+      it "should allow <%=#{ind} and <% for unescaped capturing when with :escape => #{!escape}" do
+        @options[:bufvar] = '@a'
+        @options[:escape] = !escape
+        setup_bar
+        check_output(<<END1, <<END2, <<END3){}
+<table>
+ <tbody>
+  <%=#{ind} bar do %>
+   <b><%=#{ind} '&' %></b>
+ <% end %>
+ </tbody>
+</table>
+END1
+#{'__erubi = ::Erubi; ' if !escape}@a = ::Erubi::CaptureBlockEngine::Buffer.new; @a << '<table>
+ <tbody>
+  '; @a <<=  bar do ; @a << '
+'; @a << '   <b>'; @a <<=  '&' ; @a << '</b>
+';  end 
+ @a << ' </tbody>
+</table>
+';
+@a.to_s
+END2
+<table>
+ <tbody>
+  A
+   <B>&</B>
+B </tbody>
+</table>
+END3
+     end
+    end
+  end
+
 end

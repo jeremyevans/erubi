@@ -1,3 +1,7 @@
+=== master
+
+* Add erubi/capture_block, supporting capturing block output via standard <%= and <%== tags (jeremyevans)
+
 === 1.12.0 (2022-12-22)
 
 * Use erb/escape for faster html escaping if available (jeremyevans)
