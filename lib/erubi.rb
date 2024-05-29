@@ -20,7 +20,7 @@ module Erubi
   begin
     require 'erb/escape'
     # :nocov:
-    define_singleton_method(:h, ERB::Escape.instance_method(:html_escape))
+    define_method(:h, ERB::Escape.instance_method(:html_escape))
     # :nocov:
   rescue LoadError
     begin
@@ -32,24 +32,25 @@ module Erubi
       end
       # :nocov:
       # Escape characters with their HTML/XML equivalents.
-      def self.h(value)
+      def h(value)
         CGI.escapeHTML(value.to_s)
       end
     rescue LoadError
       # :nocov:
       ESCAPE_TABLE = {'&' => '&amp;'.freeze, '<' => '&lt;'.freeze, '>' => '&gt;'.freeze, '"' => '&quot;'.freeze, "'" => '&#39;'.freeze}.freeze
       if RUBY_VERSION >= '1.9'
-        def self.h(value)
+        def h(value)
           value.to_s.gsub(/[&<>"']/, ESCAPE_TABLE)
         end
       else
-        def self.h(value)
+        def h(value)
           value.to_s.gsub(/[&<>"']/){|s| ESCAPE_TABLE[s]}
         end
       end
       # :nocov:
     end
   end
+  module_function :h
 
   class Engine
     # The default regular expression used for scanning.

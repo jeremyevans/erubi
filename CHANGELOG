@@ -1,5 +1,7 @@
 === master
 
+* Define Erubi.h as a module function (jeremyevans)
+
 * Add erubi/capture_block, supporting capturing block output via standard <%= and <%== tags (jeremyevans)
 
 === 1.12.0 (2022-12-22)

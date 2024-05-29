@@ -30,14 +30,15 @@ module Erubi
   # This engine does not support the :chain_appends option, and ignores it if present.
   class CaptureBlockEngine < Engine
     class Buffer < ::String
+    
       # Convert argument to string when concatening
       def <<(v)
-        super(v.to_s)
+        concat(v.to_s)
       end
 
       # Escape argument using Erubi.h then then concatenate it to the receiver.
       def |(v)
-        self << ::Erubi.h(v)
+        concat(h(v))
       end
 
       # Temporarily clear the receiver before yielding to the block, yield the
@@ -51,6 +52,18 @@ module Erubi
       ensure
         replace(prev)
       end
+
+      private
+
+      if RUBY_VERSION >= '2'
+        define_method(:h, ::Erubi.instance_method(:h))
+      # :nocov:
+      else
+        def h(v)
+          ::Erubi.h(v)
+        end
+      end
+      # :nocov:
     end
 
     def initialize(input, properties={})
