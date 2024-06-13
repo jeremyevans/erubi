@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.author = ["Jeremy Evans", 'kuwata-lab.com']
   s.email = "code@jeremyevans.net"
   s.homepage = "https://github.com/jeremyevans/erubi"
-  s.files = %w(MIT-LICENSE CHANGELOG README.rdoc Rakefile lib/erubi.rb lib/erubi/capture_end.rb)
+  s.files = %w(MIT-LICENSE CHANGELOG README.rdoc Rakefile lib/erubi.rb lib/erubi/capture_end.rb lib/erubi/capture_block.rb)
   s.description = "Erubi is a ERB template engine for ruby. It is a simplified fork of Erubis"
   s.add_development_dependency "minitest"
   s.add_development_dependency "minitest-global_expectations"
