@@ -205,16 +205,25 @@ module Erubi
 
     private
 
+    if RUBY_VERSION >= '2.3'
+      def _dup_string_if_frozen(string)
+        +string
+      end
+    # :nocov:
+    else
+      def _dup_string_if_frozen(string)
+        string.frozen? ? string.dup : string
+      end
+    end
+    # :nocov:
+
     # Add raw text to the template.  Modifies argument if argument is mutable as a memory optimization.
     # Must be called with a string, cannot be called with nil (Rails's subclass depends on it).
     def add_text(text)
       return if text.empty?
 
-      if text.frozen?
-        text = text.gsub(/['\\]/, '\\\\\&')
-      else
-        text.gsub!(/['\\]/, '\\\\\&')
-      end
+      text = _dup_string_if_frozen(text)
+      text.gsub!(/['\\]/, '\\\\\&')
 
       with_buffer{@src << " << '" << text << @text_end}
     end
