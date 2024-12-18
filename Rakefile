@@ -42,7 +42,7 @@ end
 
 spec = proc do |env|
   env.each{|k,v| ENV[k] = v}
-  sh "#{FileUtils::RUBY} #{'-w' if RUBY_VERSION >= '3'} test/test.rb"
+  sh "#{FileUtils::RUBY} #{'-w' if RUBY_VERSION >= '3'} #{'-W:strict_unused_block' if RUBY_VERSION >= '3.4'} test/test.rb"
   env.each{|k,v| ENV.delete(k)}
 end
 
