@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Erubi
-  VERSION = '1.13.0'
+  VERSION = '1.13.1'
 
   # :nocov:
   if RUBY_VERSION >= '1.9'

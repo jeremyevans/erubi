@@ -1,6 +1,6 @@
-=== master
+=== 1.13.1 (2024-12-19)
 
-* Avoid spurious frozen string literal warnings on Ruby 3.4.0-preview2 (jeremyevans)
+* Avoid spurious frozen string literal warnings for chilled strings when using Ruby 3.4 (jeremyevans)
 
 === 1.13.0 (2024-06-13)
 
