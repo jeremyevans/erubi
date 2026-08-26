@@ -13,12 +13,11 @@ if ENV['COVERAGE']
 
   ENV.delete('COVERAGE')
   SimpleCov.instance_eval do
-    enable_coverage :branch
-
     start do
-      add_filter{|f| f.filename.match(%r{\A#{Regexp.escape(File.dirname(__FILE__))}/})}
-      add_group('Missing'){|src| src.covered_percent < 100}
-      add_group('Covered'){|src| src.covered_percent == 100}
+      coverage :line
+      coverage :branch
+      cover "lib/**/*.rb"
+      group('Missing'){|src| src.covered_percent < 100}
     end
   end
 end

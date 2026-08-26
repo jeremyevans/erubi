@@ -57,13 +57,13 @@ module Erubi
 
       if RUBY_VERSION >= '2'
         define_method(:h, ::Erubi.instance_method(:h))
-      # :nocov:
+      # simplecov:disable
       else
         def h(v)
           ::Erubi.h(v)
         end
       end
-      # :nocov:
+      # simplecov:enable
     end
 
     def initialize(input, properties={})

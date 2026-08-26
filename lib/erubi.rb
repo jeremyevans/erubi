@@ -3,7 +3,7 @@
 module Erubi
   VERSION = '1.13.1'
 
-  # :nocov:
+  # simplecov:disable
   if RUBY_VERSION >= '1.9'
     RANGE_FIRST = 0
     RANGE_LAST = -1
@@ -15,12 +15,12 @@ module Erubi
   MATCH_METHOD = RUBY_VERSION >= '2.4' ? :match? : :match
   SKIP_DEFINED_FOR_INSTANCE_VARIABLE = RUBY_VERSION > '3'
   FREEZE_TEMPLATE_LITERALS = !eval("''").frozen? && RUBY_VERSION >= '2.1'
-  # :nocov:
+  # simplecov:enable
 
   begin
     require 'erb/escape'
     define_method(:h, ERB::Escape.instance_method(:html_escape))
-  # :nocov:
+  # simplecov:disable
   rescue LoadError
     begin
       require 'cgi/escape'
@@ -45,7 +45,7 @@ module Erubi
       end
     end
   end
-  # :nocov:
+  # simplecov:enable
   module_function :h
 
   class Engine
@@ -209,13 +209,13 @@ module Erubi
       def _dup_string_if_frozen(string)
         +string
       end
-    # :nocov:
+    # simplecov:disable
     else
       def _dup_string_if_frozen(string)
         string.frozen? ? string.dup : string
       end
     end
-    # :nocov:
+    # simplecov:enable
 
     # Add raw text to the template.  Modifies argument if argument is mutable as a memory optimization.
     # Must be called with a string, cannot be called with nil (Rails's subclass depends on it).
