@@ -52,6 +52,7 @@ module Erubi
       ensure
         replace(prev)
       end
+      ruby2_keywords(:capture) if respond_to?(:ruby2_keywords, true)
 
       private
 
