@@ -193,7 +193,7 @@ module Erubi
           handle(indicator, code, tailch, rspace, lspace)
         end
       end
-      rest = pos == 0 ? input : input[pos..-1]
+      rest = input[pos..-1]
       add_text(rest)
 
       src << "\n" unless src[RANGE_LAST] == "\n"
