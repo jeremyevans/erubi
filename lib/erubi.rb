@@ -222,6 +222,16 @@ module Erubi
     def add_text(text)
       return if text.empty?
 
+      if text.include?("\r\n")
+        if text.respond_to?(:encoding) && !text.ascii_only?
+          encoding = Encoding.compatible?(@src, text)
+          raise Encoding::CompatibilityError, "incompatible character encodings: #{@src.encoding} and #{text.encoding}" unless encoding
+          @src.force_encoding(encoding)
+        end
+        with_buffer{@src << " << (" << "\n" * text.count("\n") << text.dump << @text_end[1..-1] << ")"}
+        return
+      end
+
       text = _dup_string_if_frozen(text)
       text.gsub!(/['\\]/, '\\\\\&')
 
