@@ -115,6 +115,16 @@ a
 END3
       end
 
+      it "should not mutate mutable input without tags" do
+        input = String.new("it's")
+
+        2.times do
+          eval(@engine.new(input).src).must_equal "it's"
+        end
+
+        input.must_equal "it's"
+      end
+
       it "should handle no options" do
         list = list = ['&\'<>"2']
         check_output(<<END1, <<END2, <<END3){}
