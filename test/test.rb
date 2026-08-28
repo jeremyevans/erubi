@@ -115,6 +115,31 @@ a
 END3
       end
 
+      it "should preserve CRLF text and following source lines" do
+        input = "a\r\nb<%= __LINE__ %>"
+
+        eval(@engine.new(input).src).must_equal "a\r\nb2"
+      end
+
+      if ''.respond_to?(:encoding)
+        it "should preserve the encoding of non-ASCII CRLF text" do
+          input = "a\xE9\r\nb".force_encoding(Encoding::ISO_8859_1)
+          src = String.new.force_encoding(Encoding::ISO_8859_1)
+
+          result = eval(@engine.new(input, :src=>src).src)
+
+          result.must_equal input
+          result.encoding.must_equal input.encoding
+        end
+
+        it "should reject incompatible CRLF text and source encodings" do
+          input = "a\xE9\r\nb".force_encoding(Encoding::ISO_8859_1)
+          src = "\u{E9}"
+
+          proc{@engine.new(input, :src=>src)}.must_raise Encoding::CompatibilityError
+        end
+      end
+
       it "should handle no options" do
         list = list = ['&\'<>"2']
         check_output(<<END1, <<END2, <<END3){}
